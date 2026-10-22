@@ -4,6 +4,8 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from .managers import ApplicationQuerySet, VacancyQuerySet
+
 
 class TimeStampedModel(models.Model):
     """Abstract base: adds created_at / updated_at to every domain model."""
@@ -73,6 +75,8 @@ class Vacancy(TimeStampedModel):
     state = models.CharField(max_length=10, choices=State, default=State.INBOX)
     dismiss_reason = models.TextField(blank=True)
 
+    objects = VacancyQuerySet.as_manager()
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -113,6 +117,8 @@ class Application(TimeStampedModel):
     status = models.CharField(max_length=12, choices=Status, default=Status.APPLIED)
     applied_at = models.DateField(default=date.today)
     notes = models.TextField(blank=True)
+
+    objects = ApplicationQuerySet.as_manager()
 
     def __str__(self):
         return f"{self.vacancy} [{self.get_status_display()}]"
