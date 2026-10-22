@@ -42,7 +42,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements/dev.txt
       - run: >-
-          pytest --cov=accounts --cov-report=term --cov-fail-under=85
+          pytest --cov=accounts --cov=tracker --cov-report=term --cov-fail-under=85
 
   security:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install bandit pip-audit
-      - run: bandit -r accounts config -q
+      - run: bandit -r accounts tracker config -q
       - run: pip-audit -r requirements/base.txt
 
   gitleaks:
