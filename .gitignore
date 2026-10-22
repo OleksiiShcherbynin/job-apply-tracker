@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Testing / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Django
+media/
+staticfiles/
+
+# Secrets & local config
+.env
+
+# Tooling scratch
+.superpowers/
+.ruff_cache/
