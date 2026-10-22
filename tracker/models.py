@@ -1,5 +1,8 @@
+from datetime import date
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class TimeStampedModel(models.Model):
@@ -81,3 +84,72 @@ class Vacancy(TimeStampedModel):
 
     def __str__(self):
         return f"{self.title} @ {self.company}"
+
+
+class Application(TimeStampedModel):
+    class Status(models.TextChoices):
+        APPLIED = "applied", "Applied"
+        REPLIED = "replied", "Replied"
+        INTERVIEW = "interview", "Interview"
+        OFFER = "offer", "Offer"
+        REJECTED = "rejected", "Rejected"
+        NO_RESPONSE = "no_response", "No response"
+        WITHDRAWN = "withdrawn", "Withdrawn"
+
+    # Statuses where the ball may be in the company's court: these feed
+    # the needs-attention dashboard.
+    ACTIVE_STATUSES = (Status.APPLIED, Status.REPLIED)
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="applications",
+    )
+    vacancy = models.OneToOneField(
+        Vacancy,
+        on_delete=models.PROTECT,
+        related_name="application",
+    )
+    status = models.CharField(max_length=12, choices=Status, default=Status.APPLIED)
+    applied_at = models.DateField(default=date.today)
+    notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.vacancy} [{self.get_status_display()}]"
+
+    def change_status(self, new_status, comment="", when=None):
+        old_status_display = self.get_status_display()
+        self.status = new_status
+        self.save()
+
+        event = ApplicationEvent.objects.create(
+            application=self,
+            type=ApplicationEvent.EventType.STATUS_CHANGE,
+            happened_at=when or timezone.now(),
+            text=f"{old_status_display} → {self.get_status_display()}. {comment}".strip(),
+        )
+        return event
+
+
+class ApplicationEvent(TimeStampedModel):
+    class EventType(models.TextChoices):
+        STATUS_CHANGE = "status_change", "Status change"
+        NOTE = "note", "Note"
+        CALL = "call", "Call"
+        INTERVIEW = "interview", "Interview"
+        EMAIL = "email", "Email"
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    type = models.CharField(max_length=15, choices=EventType)
+    happened_at = models.DateTimeField(default=timezone.now)
+    text = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-happened_at"]
+
+    def __str__(self):
+        return f"{self.get_type_display()} @ {self.happened_at:%Y-%m-%d %H:%M}"

@@ -1,9 +1,12 @@
+from datetime import timedelta
+
 import pytest
 from django.db import IntegrityError
 from django.db.models import ProtectedError
+from django.utils import timezone
 
-from tracker.factories import CompanyFactory, VacancyFactory
-from tracker.models import Company, Vacancy
+from tracker.factories import ApplicationFactory, CompanyFactory, VacancyFactory
+from tracker.models import Application, ApplicationEvent, Company, Vacancy
 
 
 @pytest.mark.django_db
@@ -43,3 +46,24 @@ def test_company_protected():
     vacancy = VacancyFactory()
     with pytest.raises(ProtectedError):
         vacancy.company.delete()
+
+
+@pytest.mark.django_db
+def test_change_status_updates_and_writes_event():
+    application = ApplicationFactory()
+    event = application.change_status(Application.Status.REPLIED, comment="Got an email")
+    application.refresh_from_db()
+    assert application.status == Application.Status.REPLIED
+    assert application.events.count() == 1
+    assert event.type == ApplicationEvent.EventType.STATUS_CHANGE
+    assert "Applied" in event.text
+    assert "Replied" in event.text
+    assert "Got an email" in event.text
+
+
+@pytest.mark.django_db
+def test_change_status_when_sets_happened_at():
+    application = ApplicationFactory()
+    when = timezone.now() - timedelta(days=3)
+    event = application.change_status(Application.Status.NO_RESPONSE, when=when)
+    assert event.happened_at == when

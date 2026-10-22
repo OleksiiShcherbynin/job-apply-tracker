@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Company, Vacancy
+from .models import Application, ApplicationEvent, Company, Vacancy
 
 
 @admin.register(Company)
@@ -14,3 +14,15 @@ class VacancyAdmin(admin.ModelAdmin):
     list_display = ("title", "company", "state", "score", "source")
     list_filter = ("state", "source")
     search_fields = ("title", "company__name")
+
+
+class ApplicationEventInline(admin.TabularInline):
+    model = ApplicationEvent
+    extra = 0
+
+
+@admin.register(Application)
+class ApplicationAdmin(admin.ModelAdmin):
+    list_display = ("vacancy", "status", "applied_at", "owner")
+    list_filter = ("status",)
+    inlines = [ApplicationEventInline]
