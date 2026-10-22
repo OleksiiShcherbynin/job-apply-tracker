@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Application, ApplicationEvent, Company, Vacancy
+from .models import Application, ApplicationEvent, Attachment, Company, Vacancy
 
 
 @admin.register(Company)
@@ -21,8 +21,13 @@ class ApplicationEventInline(admin.TabularInline):
     extra = 0
 
 
+class AttachmentInline(admin.TabularInline):
+    model = Attachment
+    extra = 0
+
+
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = ("vacancy", "status", "applied_at", "owner")
     list_filter = ("status",)
-    inlines = [ApplicationEventInline]
+    inlines = [ApplicationEventInline, AttachmentInline]

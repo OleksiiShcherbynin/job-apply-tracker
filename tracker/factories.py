@@ -2,7 +2,7 @@ import factory
 
 from accounts.factories import UserFactory
 
-from .models import Application, ApplicationEvent, Company, Vacancy
+from .models import Application, ApplicationEvent, Attachment, Company, Vacancy
 
 
 class CompanyFactory(factory.django.DjangoModelFactory):
@@ -37,3 +37,12 @@ class EventFactory(factory.django.DjangoModelFactory):
 
     application = factory.SubFactory(ApplicationFactory)
     type = ApplicationEvent.EventType.NOTE
+
+
+class AttachmentFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Attachment
+
+    application = factory.SubFactory(ApplicationFactory)
+    file = factory.django.FileField(filename="cv.pdf")
+    label = "CV"

@@ -153,3 +153,21 @@ class ApplicationEvent(TimeStampedModel):
 
     def __str__(self):
         return f"{self.get_type_display()} @ {self.happened_at:%Y-%m-%d %H:%M}"
+
+
+class Attachment(TimeStampedModel):
+    """A file sent with an application (CV version, cover letter, ...).
+
+    created_at doubles as the upload timestamp.
+    """
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(upload_to="attachments/%Y/%m/")
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.label
