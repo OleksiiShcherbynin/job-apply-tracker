@@ -12,6 +12,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # local apps
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -43,9 +45,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Custom user model must exist before the first migration of any app.
-# Uncommented in Task 2 when the accounts app appears.
-# AUTH_USER_MODEL = "accounts.User"
+# Custom user model; must exist before the first migration of any app.
+AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
