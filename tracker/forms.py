@@ -3,7 +3,21 @@ from pathlib import Path
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Attachment
+from .models import Attachment, Company
+
+
+class OwnedModelForm(forms.ModelForm):
+    """ModelForm for owner-scoped models.
+
+    The view passes owner=request.user. `owner` is never a form field (the user
+    must not pick it), so Django skips the (owner, ...) unique constraints during
+    validation; owner-aware checks go into clean_<field> using self.owner.
+    """
+
+    def __init__(self, *args, owner, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.owner = owner
+        self.instance.owner = owner
 
 
 class AttachmentForm(forms.ModelForm):
@@ -25,3 +39,18 @@ class AttachmentForm(forms.ModelForm):
         if uploaded.size > self.MAX_SIZE:
             raise ValidationError("File is larger than 5 MB.")
         return uploaded
+
+
+class CompanyForm(OwnedModelForm):
+    class Meta:
+        model = Company
+        fields = ["name", "website", "notes"]
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        same_name = Company.objects.filter(owner=self.owner, name__iexact=name)
+        others = same_name.exclude(pk=self.instance.pk)
+        if others.exists():
+            raise forms.ValidationError("You already have a company with this name.")
+
+        return name

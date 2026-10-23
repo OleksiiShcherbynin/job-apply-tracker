@@ -10,6 +10,11 @@ select = ["E", "F", "I", "UP", "B", "DJ"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.dev"
 python_files = ["test_*.py"]
+filterwarnings = [
+    # Django 6.0 will default URL fields to https://, which is what we want;
+    # the transitional opt-in setting is itself deprecated, so just wait.
+    "ignore:The default scheme will be changed:django.utils.deprecation.RemovedInDjango60Warning",
+]
 
 [tool.coverage.run]
 omit = ["*/migrations/*"]
