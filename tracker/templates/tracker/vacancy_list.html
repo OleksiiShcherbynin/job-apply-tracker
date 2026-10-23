@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Vacancies · Job Apply Tracker{% endblock %}
+
+{% block content %}
+  <h1>Vacancies</h1>
+  <p>
+    Show:
+    <a href="{% url 'tracker:vacancy_list' %}">all</a>
+    {% for value, label in states %}
+      · <a href="?state={{ value }}">{% if value == current_state %}<strong>{{ label }}</strong>{% else %}{{ label }}{% endif %}</a>
+    {% endfor %}
+    — <a href="{% url 'tracker:vacancy_add' %}">add vacancy</a>
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Title</th><th>Company</th><th>State</th><th>Score</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for vacancy in vacancy_list %}
+        <tr>
+          <td>{{ vacancy.title }}</td>
+          <td>{{ vacancy.company }}</td>
+          <td>{{ vacancy.get_state_display }}</td>
+          <td>{{ vacancy.score|default:"—" }}</td>
+          <td>
+            <a href="{% url 'tracker:vacancy_edit' vacancy.pk %}">Edit</a> ·
+            <a href="{% url 'tracker:vacancy_delete' vacancy.pk %}">Delete</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">Nothing here.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

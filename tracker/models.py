@@ -1,7 +1,8 @@
-from datetime import date
+from datetime import date, datetime
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 
 from .managers import ApplicationQuerySet, VacancyQuerySet
@@ -89,6 +90,28 @@ class Vacancy(TimeStampedModel):
     def __str__(self):
         return f"{self.title} @ {self.company}"
 
+    def mark_applied(self, applied_at, notes=""):
+        """Record that the user applied: Application + first timeline event.
+
+        The event is dated on applied_at, not "now": an application entered
+        a few days late must still age correctly in needs_attention.
+        """
+        with transaction.atomic():
+            application = Application.objects.create(
+                owner=self.owner, vacancy=self, applied_at=applied_at, notes=notes
+            )
+            ApplicationEvent.objects.create(
+                application=application,
+                type=ApplicationEvent.EventType.STATUS_CHANGE,
+                happened_at=timezone.make_aware(
+                    datetime.combine(applied_at, timezone.localtime().time())
+                ),
+                text=f"→ {Application.Status.APPLIED.label}",
+            )
+            self.state = self.State.APPLIED
+            self.save(update_fields=["state", "updated_at"])
+        return application
+
 
 class Application(TimeStampedModel):
     class Status(models.TextChoices):
@@ -122,6 +145,9 @@ class Application(TimeStampedModel):
 
     def __str__(self):
         return f"{self.vacancy} [{self.get_status_display()}]"
+
+    def get_absolute_url(self):
+        return reverse("tracker:application_detail", args=[self.pk])
 
     def change_status(self, new_status, comment="", when=None):
         old_status_display = self.get_status_display()

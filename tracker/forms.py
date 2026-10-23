@@ -2,8 +2,23 @@ from pathlib import Path
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
-from .models import Attachment, Company
+from .models import Attachment, Company, Vacancy
+
+# Guard against mess and mistakes, not against attackers: every user only
+# uploads into their own tracker.
+ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".odt", ".txt"}
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5 MB
+
+
+def validate_upload(uploaded):
+    extension = Path(uploaded.name).suffix.lower()
+    if extension not in ALLOWED_EXTENSIONS:
+        allowed = ", ".join(sorted(ALLOWED_EXTENSIONS))
+        raise ValidationError(f"File type {extension or '(none)'} not allowed. Use: {allowed}.")
+    if uploaded.size > MAX_UPLOAD_SIZE:
+        raise ValidationError("File is larger than 5 MB.")
 
 
 class OwnedModelForm(forms.ModelForm):
@@ -21,23 +36,13 @@ class OwnedModelForm(forms.ModelForm):
 
 
 class AttachmentForm(forms.ModelForm):
-    # Guard against mess and mistakes, not against attackers: this is the
-    # user's own single-tenant tracker.
-    ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".odt", ".txt"}
-    MAX_SIZE = 5 * 1024 * 1024  # 5 MB
-
     class Meta:
         model = Attachment
         fields = ["file", "label"]
 
     def clean_file(self):
         uploaded = self.cleaned_data["file"]
-        extension = Path(uploaded.name).suffix.lower()
-        if extension not in self.ALLOWED_EXTENSIONS:
-            allowed = ", ".join(sorted(self.ALLOWED_EXTENSIONS))
-            raise ValidationError(f"File type {extension or '(none)'} not allowed. Use: {allowed}.")
-        if uploaded.size > self.MAX_SIZE:
-            raise ValidationError("File is larger than 5 MB.")
+        validate_upload(uploaded)
         return uploaded
 
 
@@ -54,3 +59,38 @@ class CompanyForm(OwnedModelForm):
             raise forms.ValidationError("You already have a company with this name.")
 
         return name
+
+
+class VacancyForm(OwnedModelForm):
+    class Meta:
+        model = Vacancy
+        fields = ["company", "title", "url", "salary", "location"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["company"].queryset = Company.objects.filter(owner=self.owner)
+
+
+class ApplyForm(forms.Form):
+    """Form behind the "I applied" button: when, notes, and optionally the file sent."""
+
+    applied_at = forms.DateField(
+        initial=timezone.localdate,
+        widget=forms.DateInput(attrs={"type": "date"}),
+        help_text="When you actually sent it — may be in the past.",
+    )
+    notes = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
+    file = forms.FileField(required=False, help_text="CV or cover letter you sent (optional).")
+    label = forms.CharField(max_length=100, required=False, help_text='e.g. "CV v3 EN"')
+
+    def clean_file(self):
+        uploaded = self.cleaned_data["file"]
+        if uploaded:
+            validate_upload(uploaded)
+        return uploaded
+
+
+class DismissForm(forms.ModelForm):
+    class Meta:
+        model = Vacancy
+        fields = ["dismiss_reason"]

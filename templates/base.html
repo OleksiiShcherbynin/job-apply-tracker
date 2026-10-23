@@ -13,6 +13,8 @@
       {% if user.is_authenticated %}
         <ul>
           <li><a href="{% url 'tracker:dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'tracker:inbox' %}">Inbox</a></li>
+          <li><a href="{% url 'tracker:vacancy_list' %}">Vacancies</a></li>
           <li><a href="{% url 'tracker:company_list' %}">Companies</a></li>
           <li>{{ user.username }}</li>
           <li>

@@ -3,7 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from accounts.factories import UserFactory
 from tracker.factories import CompanyFactory
-from tracker.forms import AttachmentForm, CompanyForm
+from tracker.forms import AttachmentForm, CompanyForm, VacancyForm
 
 
 def make_form(filename, size=1024):
@@ -66,3 +66,30 @@ def test_company_form_edit_keeps_own_name():
     data = {"name": "ESET", "notes": "new note"}
     form = CompanyForm(data=data, instance=company, owner=company.owner)
     assert form.is_valid(), form.errors
+
+
+# --- VacancyForm (пишет Алексей) ---
+
+
+@pytest.mark.django_db
+def test_vacancy_form_valid():
+    company = CompanyFactory()
+    form = VacancyForm(data={"company": company.pk, "title": "Junior Python"}, owner=company.owner)
+    assert form.is_valid(), form.errors
+
+
+@pytest.mark.django_db
+def test_vacancy_form_shows_only_own_companies():
+    mine = CompanyFactory(name="ESET")
+    CompanyFactory(name="Someone Else Inc")  # чужая компания
+    form = VacancyForm(owner=mine.owner)
+    assert list(form.fields["company"].queryset) == [mine]
+
+
+@pytest.mark.django_db
+def test_vacancy_form_rejects_foreign_company():
+    owner = UserFactory()
+    foreign = CompanyFactory()  # принадлежит другому пользователю
+    form = VacancyForm(data={"company": foreign.pk, "title": "Junior Python"}, owner=owner)
+    assert not form.is_valid()
+    assert "company" in form.errors

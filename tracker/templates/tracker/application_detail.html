@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ application.vacancy.title }}</h1>
+  <p>{{ application.vacancy.company }} · {{ application.get_status_display }} · applied {{ application.applied_at }}</p>
+  {% if application.notes %}<p>{{ application.notes }}</p>{% endif %}
+
+  <h2>Timeline</h2>
+  <ul>
+    {% for event in application.events.all %}
+      <li>{{ event.happened_at|date:"Y-m-d H:i" }} — {{ event.get_type_display }}: {{ event.text }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Attachments</h2>
+  <ul>
+    {% for attachment in application.attachments.all %}
+      <li><a href="{{ attachment.file.url }}">{{ attachment.label }}</a></li>
+    {% empty %}
+      <li>None.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

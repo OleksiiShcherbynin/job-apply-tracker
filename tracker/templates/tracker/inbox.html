@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Inbox · Job Apply Tracker{% endblock %}
+
+{% block content %}
+  <h1>Inbox</h1>
+  <p>Vacancies waiting for a decision, best score first.
+     <a href="{% url 'tracker:vacancy_add' %}">Add one by hand</a>.</p>
+
+  {% for vacancy in vacancy_list %}
+    <article>
+      <header>
+        <strong>{{ vacancy.title }}</strong> — {{ vacancy.company }}
+        {% if vacancy.score is not None %}<mark>score {{ vacancy.score }}</mark>{% endif %}
+      </header>
+      <p>
+        {% if vacancy.salary %}{{ vacancy.salary }} · {% endif %}
+        {% if vacancy.location %}{{ vacancy.location }} · {% endif %}
+        {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
+      </p>
+      {% if vacancy.score_reasons %}<p><small>{{ vacancy.score_reasons }}</small></p>{% endif %}
+      <footer>
+        <a href="{% url 'tracker:vacancy_apply' vacancy.pk %}" role="button">I applied</a>
+        <form method="post" action="{% url 'tracker:vacancy_dismiss' vacancy.pk %}">
+          {% csrf_token %}
+          <input type="text" name="dismiss_reason" placeholder="Why not? (optional)">
+          <button type="submit" class="secondary">Dismiss</button>
+        </form>
+      </footer>
+    </article>
+  {% empty %}
+    <p>Inbox is empty. Nice.</p>
+  {% endfor %}
+{% endblock %}
