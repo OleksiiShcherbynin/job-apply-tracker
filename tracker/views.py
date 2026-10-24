@@ -1,0 +1,318 @@
+from pathlib import Path
+
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from django.db.models import Count, ProtectedError, Q
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    View,
+)
+from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.detail import SingleObjectMixin
+
+from .forms import (
+    ApplyForm,
+    AttachmentForm,
+    CompanyForm,
+    DismissForm,
+    EventForm,
+    StatusChangeForm,
+    VacancyForm,
+)
+from .mixins import OwnerFormMixin, OwnerQuerySetMixin
+from .models import Application, ApplicationEvent, Attachment, Company, Vacancy
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "tracker/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        applications = Application.objects.for_owner(user)
+
+        context["needs_attention"] = (
+            Application.objects.needs_attention(user)
+            .select_related("vacancy__company")
+            .order_by("applied_at")
+        )
+        counts = dict(applications.values_list("status").annotate(n=Count("id")))
+        context["status_counts"] = [
+            (label, counts.get(value, 0)) for value, label in Application.Status.choices
+        ]
+        context["recent_events"] = (
+            ApplicationEvent.objects.filter(application__owner=user)
+            .select_related("application__vacancy__company")
+            .order_by("-happened_at")[:10]
+        )
+        context["inbox_count"] = Vacancy.objects.for_owner(user).inbox().count()
+        return context
+
+
+# --- Companies ---
+
+
+class CompanyListView(OwnerQuerySetMixin, ListView):
+    model = Company
+
+
+class CompanyCreateView(LoginRequiredMixin, OwnerFormMixin, CreateView):
+    model = Company
+    form_class = CompanyForm
+    success_url = reverse_lazy("tracker:company_list")
+
+
+class CompanyUpdateView(OwnerQuerySetMixin, OwnerFormMixin, UpdateView):
+    model = Company
+    form_class = CompanyForm
+    success_url = reverse_lazy("tracker:company_list")
+
+
+class CompanyDeleteView(OwnerQuerySetMixin, DeleteView):
+    model = Company
+    success_url = reverse_lazy("tracker:company_list")
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except ProtectedError:
+            messages.error(
+                self.request,
+                f"{self.object} has vacancies — delete or move them first.",
+            )
+            return redirect("tracker:company_list")
+
+
+# --- Vacancies ---
+
+
+class InboxView(OwnerQuerySetMixin, ListView):
+    model = Vacancy
+    template_name = "tracker/inbox.html"
+
+    def get_queryset(self):
+        # select_related: fetch each vacancy's company in the same query (JOIN),
+        # otherwise the template's {{ vacancy.company }} costs one query per row.
+        return super().get_queryset().inbox().select_related("company")
+
+
+class VacancyListView(OwnerQuerySetMixin, ListView):
+    model = Vacancy
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related("company").order_by("-created_at")
+        state = self.request.GET.get("state")
+        if state in Vacancy.State.values:
+            queryset = queryset.filter(state=state)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["states"] = Vacancy.State.choices
+        context["current_state"] = self.request.GET.get("state", "")
+        return context
+
+
+class VacancyCreateView(LoginRequiredMixin, OwnerFormMixin, CreateView):
+    model = Vacancy
+    form_class = VacancyForm
+    success_url = reverse_lazy("tracker:inbox")
+
+
+class VacancyUpdateView(OwnerQuerySetMixin, OwnerFormMixin, UpdateView):
+    model = Vacancy
+    form_class = VacancyForm
+    success_url = reverse_lazy("tracker:vacancy_list")
+
+
+class VacancyDeleteView(OwnerQuerySetMixin, DeleteView):
+    model = Vacancy
+    success_url = reverse_lazy("tracker:vacancy_list")
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except ProtectedError:
+            messages.error(
+                self.request,
+                f"{self.object} has an application — its history would be lost.",
+            )
+            return redirect("tracker:vacancy_list")
+
+
+class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
+    """The "I applied" button: turns an inbox vacancy into an Application."""
+
+    model = Vacancy
+    form_class = ApplyForm
+    template_name = "tracker/apply_form.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return self.redirect_if_applied() or super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return self.redirect_if_applied() or super().post(request, *args, **kwargs)
+
+    def redirect_if_applied(self):
+        # One application per vacancy (OneToOne): a second click or a stale
+        # tab must land on the existing one, not crash on IntegrityError.
+        existing = Application.objects.filter(vacancy=self.object).first()
+        return redirect(existing) if existing else None
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        with transaction.atomic():
+            application = self.object.mark_applied(data["applied_at"], data["notes"])
+            if data["file"]:
+                Attachment.objects.create(
+                    application=application,
+                    file=data["file"],
+                    label=data["label"],
+                )
+        messages.success(self.request, f"Applied: {self.object}.")
+        return redirect(application)
+
+
+class VacancyDismissView(OwnerQuerySetMixin, UpdateView):
+    """The "Dismiss" button. POST only: it changes data (see lesson 1)."""
+
+    model = Vacancy
+    form_class = DismissForm
+    http_method_names = ["post"]
+    success_url = reverse_lazy("tracker:inbox")
+
+    def form_valid(self, form):
+        form.instance.state = Vacancy.State.DISMISSED
+        messages.info(self.request, f"Dismissed: {form.instance}.")
+        return super().form_valid(form)
+
+
+# --- Applications ---
+
+
+class ApplicationListView(OwnerQuerySetMixin, ListView):
+    model = Application
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related("vacancy__company").order_by("-applied_at")
+        status = self.request.GET.get("status")
+        if status in Application.Status.values:
+            queryset = queryset.filter(status=status)
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            queryset = queryset.filter(
+                Q(vacancy__title__icontains=query) | Q(vacancy__company__name__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["statuses"] = Application.Status.choices
+        context["current_status"] = self.request.GET.get("status", "")
+        context["query"] = self.request.GET.get("q", "")
+        return context
+
+
+class ApplicationPageMixin(OwnerQuerySetMixin):
+    """What the application page needs, shared by the page and its small forms."""
+
+    model = Application
+    template_name = "tracker/application_detail.html"
+
+    def get_queryset(self):
+        # select_related: the one vacancy and company (JOIN).
+        # prefetch_related: the many events and attachments (one extra query each).
+        return (
+            super()
+            .get_queryset()
+            .select_related("vacancy__company")
+            .prefetch_related("events", "attachments")
+        )
+
+    def get_context_data(self, **kwargs):
+        # An invalid form arrives in kwargs and keeps its errors; the rest start empty.
+        kwargs.setdefault("event_form", EventForm())
+        kwargs.setdefault("status_form", StatusChangeForm(initial={"status": self.object.status}))
+        kwargs.setdefault("attachment_form", AttachmentForm())
+        return super().get_context_data(**kwargs)
+
+
+class ApplicationDetailView(ApplicationPageMixin, DetailView):
+    pass
+
+
+class ApplicationActionView(ApplicationPageMixin, SingleObjectMixin, TemplateResponseMixin, View):
+    """Base for the small POST-only forms on the application page.
+
+    Valid form: do the action and redirect back (POST/redirect/GET).
+    Invalid form: show the page again with that form's errors.
+    """
+
+    http_method_names = ["post"]
+    form_class = None
+    context_name = None
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.form_class(request.POST, request.FILES, **self.get_form_kwargs())
+        if not form.is_valid():
+            return self.render_to_response(self.get_context_data(**{self.context_name: form}))
+        self.act(form)
+        return redirect(self.object)
+
+    def get_form_kwargs(self):
+        return {}
+
+    def act(self, form):
+        raise NotImplementedError
+
+
+class ApplicationAddEventView(ApplicationActionView):
+    form_class = EventForm
+    context_name = "event_form"
+
+    def act(self, form):
+        event = form.save(commit=False)
+        event.application = self.object
+        event.save()
+
+
+class ApplicationChangeStatusView(ApplicationActionView):
+    form_class = StatusChangeForm
+    context_name = "status_form"
+
+    def get_form_kwargs(self):
+        return {"current_status": self.object.status}
+
+    def act(self, form):
+        self.object.change_status(form.cleaned_data["status"], form.cleaned_data["comment"])
+
+
+class ApplicationAddAttachmentView(ApplicationActionView):
+    form_class = AttachmentForm
+    context_name = "attachment_form"
+
+    def act(self, form):
+        attachment = form.save(commit=False)
+        attachment.application = self.object
+        attachment.save()
+
+
+class AttachmentDownloadView(LoginRequiredMixin, View):
+    """Serve an attachment only to its owner; a foreign or unknown pk is 404."""
+
+    def get(self, request, pk):
+        attachment = get_object_or_404(Attachment, pk=pk, application__owner=request.user)
+        return FileResponse(attachment.file.open("rb"), filename=Path(attachment.file.name).name)

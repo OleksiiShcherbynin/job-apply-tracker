@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Companies · Job Apply Tracker{% endblock %}
+
+{% block content %}
+  <h1>Companies</h1>
+  <p><a href="{% url 'tracker:company_add' %}" role="button">Add company</a></p>
+
+  {% if company_list %}
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Website</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for company in company_list %}
+          <tr>
+            <td>{{ company.name }}</td>
+            <td>{% if company.website %}<a href="{{ company.website }}">{{ company.website }}</a>{% endif %}</td>
+            <td>
+              <a href="{% url 'tracker:company_edit' company.pk %}">Edit</a> ·
+              <a href="{% url 'tracker:company_delete' company.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No companies yet.</p>
+  {% endif %}
+{% endblock %}

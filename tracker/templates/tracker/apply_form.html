@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <article>
+    <h1>I applied: {{ vacancy.title }}</h1>
+    <p>{{ vacancy.company }}</p>
+    {# multipart/form-data: without it the browser sends only the file NAME, not the file. #}
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_div }}
+      <button type="submit">Save application</button>
+      <a href="{% url 'tracker:inbox' %}">Cancel</a>
+    </form>
+  </article>
+{% endblock %}

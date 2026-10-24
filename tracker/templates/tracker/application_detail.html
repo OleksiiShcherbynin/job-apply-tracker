@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ application.vacancy.title }} · Job Apply Tracker{% endblock %}
+
+{% block content %}
+  <hgroup>
+    <h1>{{ application.vacancy.title }}</h1>
+    <p>
+      {{ application.vacancy.company }} · <strong>{{ application.get_status_display }}</strong>
+      · applied {{ application.applied_at }}
+      {% if application.vacancy.url %}· <a href="{{ application.vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
+    </p>
+  </hgroup>
+  {% if application.notes %}<p>{{ application.notes }}</p>{% endif %}
+
+  <div class="grid">
+    <article>
+      <h2>Change status</h2>
+      <form method="post" action="{% url 'tracker:application_change_status' application.pk %}">
+        {% csrf_token %}
+        {{ status_form.as_div }}
+        <button type="submit">Update status</button>
+      </form>
+    </article>
+
+    <article>
+      <h2>Add event</h2>
+      <form method="post" action="{% url 'tracker:application_add_event' application.pk %}">
+        {% csrf_token %}
+        {{ event_form.as_div }}
+        <button type="submit">Add to timeline</button>
+      </form>
+    </article>
+  </div>
+
+  <h2>Timeline</h2>
+  <ul>
+    {% for event in application.events.all %}
+      <li>
+        <strong>{{ event.happened_at|date:"Y-m-d H:i" }}</strong> — {{ event.get_type_display }}
+        {% if event.text %}: {{ event.text }}{% endif %}
+      </li>
+    {% empty %}
+      <li>Nothing yet.</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Attachments</h2>
+  <ul>
+    {% for attachment in application.attachments.all %}
+      <li><a href="{% url 'tracker:attachment_download' attachment.pk %}">{{ attachment.label }}</a> <small>({{ attachment.created_at|date:"Y-m-d" }})</small></li>
+    {% empty %}
+      <li>None.</li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="{% url 'tracker:application_add_attachment' application.pk %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ attachment_form.as_div }}
+    <button type="submit" class="secondary">Upload</button>
+  </form>
+{% endblock %}

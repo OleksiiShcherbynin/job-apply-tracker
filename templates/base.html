@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Job Apply Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/pico.min.css' %}">
+</head>
+<body>
+  <header class="container">
+    <nav>
+      <ul><li><strong>Job Apply Tracker</strong></li></ul>
+      {% if user.is_authenticated %}
+        <ul>
+          <li><a href="{% url 'tracker:dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'tracker:inbox' %}">Inbox</a></li>
+          <li><a href="{% url 'tracker:application_list' %}">Applications</a></li>
+          <li><a href="{% url 'tracker:vacancy_list' %}">Vacancies</a></li>
+          <li><a href="{% url 'tracker:company_list' %}">Companies</a></li>
+          <li>{{ user.username }}</li>
+          <li>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="secondary">Log out</button>
+            </form>
+          </li>
+        </ul>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="container">
+    {% for message in messages %}
+      <article>{{ message }}</article>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
