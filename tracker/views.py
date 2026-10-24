@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import ProtectedError, Q
+from django.db.models import Count, ProtectedError, Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -27,12 +27,33 @@ from .forms import (
     VacancyForm,
 )
 from .mixins import OwnerFormMixin, OwnerQuerySetMixin
-from .models import Application, Attachment, Company, Vacancy
+from .models import Application, ApplicationEvent, Attachment, Company, Vacancy
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    # Placeholder page; the real dashboard context arrives in Task 13.
     template_name = "tracker/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        applications = Application.objects.for_owner(user)
+
+        context["needs_attention"] = (
+            Application.objects.needs_attention(user)
+            .select_related("vacancy__company")
+            .order_by("applied_at")
+        )
+        counts = dict(applications.values_list("status").annotate(n=Count("id")))
+        context["status_counts"] = [
+            (label, counts.get(value, 0)) for value, label in Application.Status.choices
+        ]
+        context["recent_events"] = (
+            ApplicationEvent.objects.filter(application__owner=user)
+            .select_related("application__vacancy__company")
+            .order_by("-happened_at")[:10]
+        )
+        context["inbox_count"] = Vacancy.objects.for_owner(user).inbox().count()
+        return context
 
 
 # --- Companies ---

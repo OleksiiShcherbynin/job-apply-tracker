@@ -2,5 +2,55 @@
 
 {% block content %}
   <h1>Dashboard</h1>
-  <p>Hello, {{ user.username }}. The real dashboard is coming soon.</p>
+
+  <section>
+    <h2>Needs attention</h2>
+    <p><small>Active applications with no news for {{ user.follow_up_days }}+ days — time to follow up or close them.</small></p>
+    {% if needs_attention %}
+      <table>
+        <thead>
+          <tr><th>Vacancy</th><th>Company</th><th>Status</th><th>Last activity</th></tr>
+        </thead>
+        <tbody>
+          {% for application in needs_attention %}
+            <tr>
+              <td><a href="{{ application.get_absolute_url }}">{{ application.vacancy.title }}</a></td>
+              <td>{{ application.vacancy.company }}</td>
+              <td>{{ application.get_status_display }}</td>
+              <td>{% if application.last_activity %}{{ application.last_activity|timesince }} ago{% else %}applied {{ application.applied_at|timesince }} ago{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Nothing is waiting on you. 🎉</p>
+    {% endif %}
+  </section>
+
+  <div class="grid">
+    <article>
+      <h2>Status</h2>
+      <ul>
+        {% for label, count in status_counts %}
+          <li>{{ label }}: <strong>{{ count }}</strong></li>
+        {% endfor %}
+      </ul>
+      <p><a href="{% url 'tracker:inbox' %}">Inbox: {{ inbox_count }} waiting</a></p>
+    </article>
+
+    <article>
+      <h2>Recent events</h2>
+      <ul>
+        {% for event in recent_events %}
+          <li>
+            <small>{{ event.happened_at|date:"Y-m-d" }}</small>
+            <a href="{{ event.application.get_absolute_url }}">{{ event.application.vacancy.title }}</a>:
+            {{ event.get_type_display }}{% if event.text %} — {{ event.text|truncatechars:60 }}{% endif %}
+          </li>
+        {% empty %}
+          <li>No events yet.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
 {% endblock %}
