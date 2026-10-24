@@ -1,11 +1,13 @@
+import importlib
 from datetime import timedelta
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
+from django.urls import Resolver404, clear_url_caches, resolve, reverse
 from django.utils import timezone
 from pytest_django.asserts import assertContains, assertNotContains
 
+import config.urls
 from accounts.factories import UserFactory
 from tracker.factories import ApplicationFactory, AttachmentFactory, EventFactory
 from tracker.models import Application, ApplicationEvent
@@ -166,3 +168,52 @@ def test_actions_are_post_only(client, user):
         "application_add_attachment",
     ):
         assert client.get(reverse(f"tracker:{name}", args=[application.pk])).status_code == 405
+
+
+# --- Найдено на финальном ревью ---
+
+
+def test_change_status_to_same_status_is_form_error(client, user):
+    # Случайный клик «Update status» без смены статуса не должен ни писать
+    # «Applied → Applied», ни гасить напоминание в needs_attention.
+    application = make_application(user, applied_at=(timezone.now() - timedelta(days=10)).date())
+    response = client.post(
+        reverse("tracker:application_change_status", args=[application.pk]), {"status": "applied"}
+    )
+    assert response.status_code == 200
+    assert not application.events.exists()
+    assert application in Application.objects.needs_attention(user)
+
+
+def test_attachment_download_own(client, user):
+    attachment = AttachmentFactory(application__vacancy__company__owner=user)
+    response = client.get(reverse("tracker:attachment_download", args=[attachment.pk]))
+    assert response.status_code == 200
+
+
+def test_attachment_download_foreign_404(client, user):
+    attachment = AttachmentFactory()
+    response = client.get(reverse("tracker:attachment_download", args=[attachment.pk]))
+    assert response.status_code == 404
+
+
+def test_attachment_download_anonymous_redirects_to_login(client):
+    attachment = AttachmentFactory()
+    response = client.get(reverse("tracker:attachment_download", args=[attachment.pk]))
+    assert response.status_code == 302
+    assert response.url.startswith(reverse("login"))
+
+
+def test_media_has_no_public_route_even_in_debug(settings):
+    # Files go only through attachment_download (owner check). In DEBUG the
+    # project used to add a public /media/ route; make sure it's gone.
+    settings.DEBUG = True
+    importlib.reload(config.urls)
+    clear_url_caches()
+    try:
+        with pytest.raises(Resolver404):
+            resolve("/media/attachments/2026/10/cv.pdf")
+    finally:
+        settings.DEBUG = False
+        importlib.reload(config.urls)
+        clear_url_caches()

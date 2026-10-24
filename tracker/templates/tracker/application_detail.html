@@ -48,7 +48,7 @@
   <h2>Attachments</h2>
   <ul>
     {% for attachment in application.attachments.all %}
-      <li><a href="{{ attachment.file.url }}">{{ attachment.label }}</a> <small>({{ attachment.created_at|date:"Y-m-d" }})</small></li>
+      <li><a href="{% url 'tracker:attachment_download' attachment.pk %}">{{ attachment.label }}</a> <small>({{ attachment.created_at|date:"Y-m-d" }})</small></li>
     {% empty %}
       <li>None.</li>
     {% endfor %}

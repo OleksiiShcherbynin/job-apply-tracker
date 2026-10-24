@@ -151,15 +151,16 @@ class Application(TimeStampedModel):
 
     def change_status(self, new_status, comment="", when=None):
         old_status_display = self.get_status_display()
-        self.status = new_status
-        self.save()
-
-        event = ApplicationEvent.objects.create(
-            application=self,
-            type=ApplicationEvent.EventType.STATUS_CHANGE,
-            happened_at=when or timezone.now(),
-            text=f"{old_status_display} → {self.get_status_display()}. {comment}".strip(),
-        )
+        # Status and its timeline event change together or not at all.
+        with transaction.atomic():
+            self.status = new_status
+            self.save()
+            event = ApplicationEvent.objects.create(
+                application=self,
+                type=ApplicationEvent.EventType.STATUS_CHANGE,
+                happened_at=when or timezone.now(),
+                text=f"{old_status_display} → {self.get_status_display()}. {comment}".strip(),
+            )
         return event
 
 

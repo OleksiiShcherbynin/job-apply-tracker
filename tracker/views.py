@@ -1,8 +1,11 @@
+from pathlib import Path
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Count, ProtectedError, Q
-from django.shortcuts import redirect
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -176,7 +179,7 @@ class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
                 Attachment.objects.create(
                     application=application,
                     file=data["file"],
-                    label=data["label"] or data["file"].name,
+                    label=data["label"],
                 )
         messages.success(self.request, f"Applied: {self.object}.")
         return redirect(application)
@@ -263,11 +266,14 @@ class ApplicationActionView(ApplicationPageMixin, SingleObjectMixin, TemplateRes
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form = self.form_class(request.POST, request.FILES)
+        form = self.form_class(request.POST, request.FILES, **self.get_form_kwargs())
         if not form.is_valid():
             return self.render_to_response(self.get_context_data(**{self.context_name: form}))
         self.act(form)
         return redirect(self.object)
+
+    def get_form_kwargs(self):
+        return {}
 
     def act(self, form):
         raise NotImplementedError
@@ -287,6 +293,9 @@ class ApplicationChangeStatusView(ApplicationActionView):
     form_class = StatusChangeForm
     context_name = "status_form"
 
+    def get_form_kwargs(self):
+        return {"current_status": self.object.status}
+
     def act(self, form):
         self.object.change_status(form.cleaned_data["status"], form.cleaned_data["comment"])
 
@@ -299,3 +308,11 @@ class ApplicationAddAttachmentView(ApplicationActionView):
         attachment = form.save(commit=False)
         attachment.application = self.object
         attachment.save()
+
+
+class AttachmentDownloadView(LoginRequiredMixin, View):
+    """Serve an attachment only to its owner; a foreign or unknown pk is 404."""
+
+    def get(self, request, pk):
+        attachment = get_object_or_404(Attachment, pk=pk, application__owner=request.user)
+        return FileResponse(attachment.file.open("rb"), filename=Path(attachment.file.name).name)

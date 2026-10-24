@@ -41,4 +41,9 @@ urlpatterns = [
         views.ApplicationAddAttachmentView.as_view(),
         name="application_add_attachment",
     ),
+    path(
+        "attachments/<int:pk>/",
+        views.AttachmentDownloadView.as_view(),
+        name="attachment_download",
+    ),
 ]

@@ -89,6 +89,16 @@ class ApplyForm(forms.Form):
             validate_upload(uploaded)
         return uploaded
 
+    def clean(self):
+        cleaned = super().clean()
+        uploaded = cleaned.get("file")
+        if uploaded and not cleaned.get("label"):
+            # Default label from the file name, cut to Attachment.label's limit:
+            # real CV file names easily exceed 100 characters.
+            max_length = Attachment._meta.get_field("label").max_length
+            cleaned["label"] = Path(uploaded.name).stem[:max_length]
+        return cleaned
+
 
 class DismissForm(forms.ModelForm):
     class Meta:
@@ -121,3 +131,18 @@ class EventForm(forms.ModelForm):
 class StatusChangeForm(forms.Form):
     status = forms.ChoiceField(choices=Application.Status.choices)
     comment = forms.CharField(required=False)
+
+    def __init__(self, *args, current_status=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.current_status = current_status
+
+    def clean_status(self):
+        status = self.cleaned_data["status"]
+        # A no-op "change" would write "Applied → Applied" and reset the
+        # needs-attention clock; news without a status change is an event.
+        if status == self.current_status:
+            raise ValidationError(
+                "The application already has this status. "
+                "To record news without changing it, add an event."
+            )
+        return status

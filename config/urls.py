@@ -1,14 +1,10 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+# No public /media/ route, not even in DEBUG: uploaded CVs and letters are
+# private and are served only by tracker:attachment_download (owner check).
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("", include("tracker.urls")),
 ]
-
-if settings.DEBUG:
-    # Serve uploaded files in development only; production uses a real web server.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

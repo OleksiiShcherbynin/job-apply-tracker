@@ -197,3 +197,19 @@ def test_dismiss_sets_state_and_reason(client, user):
 def test_dismiss_get_not_allowed(client, user):
     vacancy = VacancyFactory(company__owner=user)
     assert client.get(reverse("tracker:vacancy_dismiss", args=[vacancy.pk])).status_code == 405
+
+
+def test_apply_with_long_filename_and_no_label(client, user):
+    # Реальные имена файлов бывают длиннее 100 символов (лимит подписи).
+    vacancy = VacancyFactory(company__owner=user)
+    long_name = "Oleksii_Shcherbynin_CV_" + "Junior_Python_Developer_" * 5 + "EN.pdf"
+    response = client.post(
+        reverse("tracker:vacancy_apply", args=[vacancy.pk]),
+        {
+            "applied_at": timezone.localdate().isoformat(),
+            "file": SimpleUploadedFile(long_name, b"%PDF-1.4"),
+        },
+    )
+    assert response.status_code == 302
+    label = Application.objects.get(vacancy=vacancy).attachments.get().label
+    assert 0 < len(label) <= 100
