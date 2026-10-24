@@ -20,9 +20,25 @@ urlpatterns = [
     path("vacancies/<int:pk>/apply/", views.VacancyApplyView.as_view(), name="vacancy_apply"),
     path("vacancies/<int:pk>/dismiss/", views.VacancyDismissView.as_view(), name="vacancy_dismiss"),
     # Applications
+    path("applications/", views.ApplicationListView.as_view(), name="application_list"),
     path(
         "applications/<int:pk>/",
         views.ApplicationDetailView.as_view(),
         name="application_detail",
+    ),
+    path(
+        "applications/<int:pk>/events/",
+        views.ApplicationAddEventView.as_view(),
+        name="application_add_event",
+    ),
+    path(
+        "applications/<int:pk>/status/",
+        views.ApplicationChangeStatusView.as_view(),
+        name="application_change_status",
+    ),
+    path(
+        "applications/<int:pk>/attachments/",
+        views.ApplicationAddAttachmentView.as_view(),
+        name="application_add_attachment",
     ),
 ]

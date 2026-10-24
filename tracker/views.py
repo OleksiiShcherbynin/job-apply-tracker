@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -12,10 +12,20 @@ from django.views.generic import (
     ListView,
     TemplateView,
     UpdateView,
+    View,
 )
+from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.detail import SingleObjectMixin
 
-from .forms import ApplyForm, CompanyForm, DismissForm, VacancyForm
+from .forms import (
+    ApplyForm,
+    AttachmentForm,
+    CompanyForm,
+    DismissForm,
+    EventForm,
+    StatusChangeForm,
+    VacancyForm,
+)
 from .mixins import OwnerFormMixin, OwnerQuerySetMixin
 from .models import Application, Attachment, Company, Vacancy
 
@@ -168,7 +178,103 @@ class VacancyDismissView(OwnerQuerySetMixin, UpdateView):
 # --- Applications ---
 
 
-class ApplicationDetailView(OwnerQuerySetMixin, DetailView):
-    # Minimal page so "Applied" has somewhere to land; Task 12 adds the
-    # timeline forms, status change and attachment upload.
+class ApplicationListView(OwnerQuerySetMixin, ListView):
     model = Application
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related("vacancy__company").order_by("-applied_at")
+        status = self.request.GET.get("status")
+        if status in Application.Status.values:
+            queryset = queryset.filter(status=status)
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            queryset = queryset.filter(
+                Q(vacancy__title__icontains=query) | Q(vacancy__company__name__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["statuses"] = Application.Status.choices
+        context["current_status"] = self.request.GET.get("status", "")
+        context["query"] = self.request.GET.get("q", "")
+        return context
+
+
+class ApplicationPageMixin(OwnerQuerySetMixin):
+    """What the application page needs, shared by the page and its small forms."""
+
+    model = Application
+    template_name = "tracker/application_detail.html"
+
+    def get_queryset(self):
+        # select_related: the one vacancy and company (JOIN).
+        # prefetch_related: the many events and attachments (one extra query each).
+        return (
+            super()
+            .get_queryset()
+            .select_related("vacancy__company")
+            .prefetch_related("events", "attachments")
+        )
+
+    def get_context_data(self, **kwargs):
+        # An invalid form arrives in kwargs and keeps its errors; the rest start empty.
+        kwargs.setdefault("event_form", EventForm())
+        kwargs.setdefault("status_form", StatusChangeForm(initial={"status": self.object.status}))
+        kwargs.setdefault("attachment_form", AttachmentForm())
+        return super().get_context_data(**kwargs)
+
+
+class ApplicationDetailView(ApplicationPageMixin, DetailView):
+    pass
+
+
+class ApplicationActionView(ApplicationPageMixin, SingleObjectMixin, TemplateResponseMixin, View):
+    """Base for the small POST-only forms on the application page.
+
+    Valid form: do the action and redirect back (POST/redirect/GET).
+    Invalid form: show the page again with that form's errors.
+    """
+
+    http_method_names = ["post"]
+    form_class = None
+    context_name = None
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.form_class(request.POST, request.FILES)
+        if not form.is_valid():
+            return self.render_to_response(self.get_context_data(**{self.context_name: form}))
+        self.act(form)
+        return redirect(self.object)
+
+    def act(self, form):
+        raise NotImplementedError
+
+
+class ApplicationAddEventView(ApplicationActionView):
+    form_class = EventForm
+    context_name = "event_form"
+
+    def act(self, form):
+        event = form.save(commit=False)
+        event.application = self.object
+        event.save()
+
+
+class ApplicationChangeStatusView(ApplicationActionView):
+    form_class = StatusChangeForm
+    context_name = "status_form"
+
+    def act(self, form):
+        self.object.change_status(form.cleaned_data["status"], form.cleaned_data["comment"])
+
+
+class ApplicationAddAttachmentView(ApplicationActionView):
+    form_class = AttachmentForm
+    context_name = "attachment_form"
+
+    def act(self, form):
+        attachment = form.save(commit=False)
+        attachment.application = self.object
+        attachment.save()

@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .models import Attachment, Company, Vacancy
+from .models import Application, ApplicationEvent, Attachment, Company, Vacancy
 
 # Guard against mess and mistakes, not against attackers: every user only
 # uploads into their own tracker.
@@ -94,3 +94,30 @@ class DismissForm(forms.ModelForm):
     class Meta:
         model = Vacancy
         fields = ["dismiss_reason"]
+
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = ApplicationEvent
+        fields = ["type", "happened_at", "text"]
+        widgets = {
+            "happened_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
+            ),
+            "text": forms.Textarea(attrs={"rows": 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Status changes go only through Application.change_status, so the
+        # timeline and the status field can never disagree.
+        self.fields["type"].choices = [
+            (value, label)
+            for value, label in self.fields["type"].choices
+            if value != ApplicationEvent.EventType.STATUS_CHANGE
+        ]
+
+
+class StatusChangeForm(forms.Form):
+    status = forms.ChoiceField(choices=Application.Status.choices)
+    comment = forms.CharField(required=False)

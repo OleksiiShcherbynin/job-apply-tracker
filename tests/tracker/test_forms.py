@@ -3,7 +3,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from accounts.factories import UserFactory
 from tracker.factories import CompanyFactory
-from tracker.forms import AttachmentForm, CompanyForm, VacancyForm
+from tracker.forms import AttachmentForm, CompanyForm, EventForm, StatusChangeForm, VacancyForm
+from tracker.models import Application, ApplicationEvent
 
 
 def make_form(filename, size=1024):
@@ -93,3 +94,41 @@ def test_vacancy_form_rejects_foreign_company():
     form = VacancyForm(data={"company": foreign.pk, "title": "Junior Python"}, owner=owner)
     assert not form.is_valid()
     assert "company" in form.errors
+
+
+# --- EventForm и StatusChangeForm ---
+
+
+def test_event_form_valid():
+    form = EventForm(data={"type": "call", "happened_at": "2026-10-20T14:30", "text": "HR call"})
+    assert form.is_valid(), form.errors
+
+
+def test_event_form_type_choices_exclude_status_change():
+    form = EventForm()
+    values = [value for value, label in form.fields["type"].choices]
+    assert ApplicationEvent.EventType.STATUS_CHANGE not in values
+    assert ApplicationEvent.EventType.CALL in values
+
+
+def test_event_form_rejects_status_change_type():
+    # Смена статуса пишется только через change_status, вручную — нельзя.
+    form = EventForm(data={"type": "status_change", "happened_at": "2026-10-20T14:30"})
+    assert not form.is_valid()
+    assert "type" in form.errors
+
+
+def test_status_change_form_valid():
+    form = StatusChangeForm(data={"status": Application.Status.INTERVIEW, "comment": "Tue 10:00"})
+    assert form.is_valid(), form.errors
+
+
+def test_status_change_form_comment_optional():
+    form = StatusChangeForm(data={"status": Application.Status.REJECTED})
+    assert form.is_valid(), form.errors
+
+
+def test_status_change_form_rejects_unknown_status():
+    form = StatusChangeForm(data={"status": "hired_by_aliens"})
+    assert not form.is_valid()
+    assert "status" in form.errors
