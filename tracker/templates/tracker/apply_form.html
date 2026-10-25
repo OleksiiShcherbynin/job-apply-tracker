@@ -15,7 +15,7 @@
     {# multipart/form-data: without it the browser sends only the file NAME, not the file. #}
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      {{ form.as_div }}
+      {% include "tracker/_form_fields.html" %}
       <button type="submit">Save application</button>
       <a href="{% url 'tracker:inbox' %}">Cancel</a>
     </form>

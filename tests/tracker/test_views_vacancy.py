@@ -7,7 +7,13 @@ from django.utils import timezone
 from pytest_django.asserts import assertContains, assertNotContains
 
 from accounts.factories import UserFactory
-from tracker.factories import ApplicationFactory, CompanyFactory, VacancyFactory
+from tracker.factories import (
+    ApplicationFactory,
+    AttachmentFactory,
+    CompanyFactory,
+    EventFactory,
+    VacancyFactory,
+)
 from tracker.models import Application, ApplicationEvent, Vacancy
 
 pytestmark = pytest.mark.django_db
@@ -97,13 +103,47 @@ def test_foreign_vacancy_404(client, user):
     assert client.post(reverse("tracker:vacancy_dismiss", args=[foreign.pk])).status_code == 404
 
 
-def test_delete_vacancy_with_application_shows_error(client, user):
+def test_delete_confirm_page_warns_about_application(client, user):
     application = ApplicationFactory(vacancy__company__owner=user)
-    response = client.post(
-        reverse("tracker:vacancy_delete", args=[application.vacancy.pk]), follow=True
-    )
-    assert Vacancy.objects.filter(pk=application.vacancy.pk).exists()
+    EventFactory(application=application)
+    response = client.get(reverse("tracker:vacancy_delete", args=[application.vacancy.pk]))
     assertContains(response, "has an application")
+    assertContains(response, 'name="delete_application"')
+
+
+def test_delete_vacancy_with_application_requires_confirmation(client, user):
+    application = ApplicationFactory(vacancy__company__owner=user)
+    response = client.post(reverse("tracker:vacancy_delete", args=[application.vacancy.pk]))
+    assert response.status_code == 200
+    assert Vacancy.objects.filter(pk=application.vacancy.pk).exists()
+    assert Application.objects.filter(pk=application.pk).exists()
+
+
+def test_delete_vacancy_with_application_when_confirmed(client, user):
+    application = ApplicationFactory(vacancy__company__owner=user)
+    EventFactory(application=application)
+    attachment = AttachmentFactory(application=application)
+    stored_name = attachment.file.name
+    storage = attachment.file.storage
+    assert storage.exists(stored_name)
+
+    response = client.post(
+        reverse("tracker:vacancy_delete", args=[application.vacancy.pk]),
+        {"delete_application": "on"},
+    )
+
+    assert response.status_code == 302
+    assert not Vacancy.objects.filter(pk=application.vacancy.pk).exists()
+    assert not Application.objects.filter(pk=application.pk).exists()
+    assert not ApplicationEvent.objects.filter(application_id=application.pk).exists()
+    assert not storage.exists(stored_name)  # the private file goes too
+
+
+def test_delete_vacancy_without_application(client, user):
+    vacancy = VacancyFactory(company__owner=user)
+    response = client.post(reverse("tracker:vacancy_delete", args=[vacancy.pk]))
+    assert response.status_code == 302
+    assert not Vacancy.objects.filter(pk=vacancy.pk).exists()
 
 
 # --- «Откликнулся» ---

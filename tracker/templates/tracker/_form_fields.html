@@ -1,0 +1,10 @@
+{# Form fields for Pico: checkboxes sit inline with their label, the rest render as usual. #}
+{{ form.non_field_errors }}
+{% for field in form %}
+  {% if field.widget_type == "checkbox" %}
+    {{ field.errors }}
+    <label>{{ field }} {{ field.label }}</label>
+  {% else %}
+    {{ field.as_field_group }}
+  {% endif %}
+{% endfor %}
