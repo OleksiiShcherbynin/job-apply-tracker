@@ -144,6 +144,8 @@ class Application(TimeStampedModel):
     # Statuses where the ball may be in the company's court: these feed
     # the needs-attention dashboard.
     ACTIVE_STATUSES = (Status.APPLIED, Status.REPLIED)
+    # Finished without an offer; the applications list hides these unless asked.
+    CLOSED_STATUSES = (Status.REJECTED, Status.NO_RESPONSE, Status.WITHDRAWN)
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

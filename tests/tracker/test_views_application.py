@@ -217,3 +217,40 @@ def test_media_has_no_public_route_even_in_debug(settings):
         settings.DEBUG = False
         importlib.reload(config.urls)
         clear_url_caches()
+
+
+# --- Архив закрытых откликов ---
+
+
+def make_closed_set(user):
+    for status, title in [
+        ("applied", "Open applied"),
+        ("offer", "Got an offer"),
+        ("rejected", "Was rejected"),
+        ("no_response", "Never answered"),
+        ("withdrawn", "I withdrew"),
+    ]:
+        make_application(user, status=status, vacancy__title=title)
+
+
+def test_closed_applications_hidden_by_default(client, user):
+    make_closed_set(user)
+    response = client.get(reverse("tracker:application_list"))
+    assertContains(response, "Open applied")
+    assertContains(response, "Got an offer")
+    for hidden in ("Was rejected", "Never answered", "I withdrew"):
+        assertNotContains(response, hidden)
+
+
+def test_archive_toggle_shows_closed(client, user):
+    make_closed_set(user)
+    response = client.get(reverse("tracker:application_list"), {"archive": "1"})
+    for title in ("Open applied", "Was rejected", "Never answered", "I withdrew"):
+        assertContains(response, title)
+
+
+def test_explicit_status_filter_shows_closed_status(client, user):
+    make_closed_set(user)
+    response = client.get(reverse("tracker:application_list"), {"status": "rejected"})
+    assertContains(response, "Was rejected")
+    assertNotContains(response, "Open applied")

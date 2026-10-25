@@ -247,6 +247,8 @@ class ApplicationListView(OwnerQuerySetMixin, ListView):
         status = self.request.GET.get("status")
         if status in Application.Status.values:
             queryset = queryset.filter(status=status)
+        elif self.request.GET.get("archive") != "1":
+            queryset = queryset.exclude(status__in=Application.CLOSED_STATUSES)
         query = self.request.GET.get("q", "").strip()
         if query:
             queryset = queryset.filter(
@@ -259,6 +261,7 @@ class ApplicationListView(OwnerQuerySetMixin, ListView):
         context["statuses"] = Application.Status.choices
         context["current_status"] = self.request.GET.get("status", "")
         context["query"] = self.request.GET.get("q", "")
+        context["show_archive"] = self.request.GET.get("archive") == "1"
         return context
 
 

@@ -14,6 +14,10 @@
         <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
+    <label>
+      <input type="checkbox" name="archive" value="1" {% if show_archive %}checked{% endif %}>
+      Archive (rejected, no response, withdrawn)
+    </label>
     <button type="submit">Search</button>
   </form>
 
