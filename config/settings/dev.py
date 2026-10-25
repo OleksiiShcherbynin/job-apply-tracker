@@ -12,7 +12,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "tracker",
+        "NAME": "tracker_dev",  # live data lives in "tracker", owned by the web container
         "USER": "tracker",
         "PASSWORD": "devpass",  # nosec B105 — matches docker-compose.yml, dev-only
         "HOST": "localhost",

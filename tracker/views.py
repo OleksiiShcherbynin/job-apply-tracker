@@ -3,10 +3,12 @@ from pathlib import Path
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, ProtectedError, Q
+from django.db.models import Count, Prefetch, ProtectedError, Q
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
+from django.utils.functional import cached_property
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -55,7 +57,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             .select_related("application__vacancy__company")
             .order_by("-happened_at")[:10]
         )
-        context["inbox_count"] = Vacancy.objects.for_owner(user).inbox().count()
+        context["inbox_count"] = Vacancy.objects.for_inbox_view(user).count()
         return context
 
 
@@ -96,14 +98,43 @@ class CompanyDeleteView(OwnerQuerySetMixin, DeleteView):
 # --- Vacancies ---
 
 
+def inbox_return_url(request):
+    """Where an inbox action returns: the same toggled view it came from.
+
+    Only same-site paths are trusted; anything else falls back to the plain
+    inbox, so the parameter can't bounce the user to another site.
+    """
+    target = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return target
+    return reverse("tracker:inbox")
+
+
 class InboxView(OwnerQuerySetMixin, ListView):
     model = Vacancy
     template_name = "tracker/inbox.html"
 
     def get_queryset(self):
-        # select_related: fetch each vacancy's company in the same query (JOIN),
-        # otherwise the template's {{ vacancy.company }} costs one query per row.
-        return super().get_queryset().inbox().select_related("company")
+        # for_inbox_view also select_related()s the company: one JOIN instead of
+        # a query per card for {{ vacancy.company }}.
+        return Vacancy.objects.for_inbox_view(
+            self.request.user,
+            unprocessed=self.show_unprocessed,
+            below_threshold=self.show_low,
+        )
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.show_unprocessed = request.GET.get("unprocessed") == "1"
+        self.show_low = request.GET.get("low") == "1"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["show_unprocessed"] = self.show_unprocessed
+        context["show_low"] = self.show_low
+        return context
 
 
 class VacancyListView(OwnerQuerySetMixin, ListView):
@@ -165,6 +196,19 @@ class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
         self.object = self.get_object()
         return self.redirect_if_applied() or super().post(request, *args, **kwargs)
 
+    @cached_property
+    def previous_attempts(self):
+        return list(self.object.previous_applications())
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["previous_attempts"] = self.previous_attempts
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        kwargs.setdefault("previous_attempts", self.previous_attempts)
+        return super().get_context_data(**kwargs)
+
     def redirect_if_applied(self):
         # One application per vacancy (OneToOne): a second click or a stale
         # tab must land on the existing one, not crash on IntegrityError.
@@ -174,7 +218,11 @@ class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
     def form_valid(self, form):
         data = form.cleaned_data
         with transaction.atomic():
-            application = self.object.mark_applied(data["applied_at"], data["notes"])
+            application = self.object.mark_applied(
+                data["applied_at"],
+                data["notes"],
+                previous_attempt=self.previous_attempts[0] if self.previous_attempts else None,
+            )
             if data["file"]:
                 Attachment.objects.create(
                     application=application,
@@ -193,10 +241,35 @@ class VacancyDismissView(OwnerQuerySetMixin, UpdateView):
     http_method_names = ["post"]
     success_url = reverse_lazy("tracker:inbox")
 
+    def get_queryset(self):
+        # Only undecided vacancies; a stale tab must not dismiss an applied one.
+        return super().get_queryset().filter(state=Vacancy.State.INBOX)
+
+    def get_success_url(self):
+        return inbox_return_url(self.request)
+
     def form_valid(self, form):
         form.instance.state = Vacancy.State.DISMISSED
         messages.info(self.request, f"Dismissed: {form.instance}.")
         return super().form_valid(form)
+
+
+class VacancyRestoreView(OwnerQuerySetMixin, SingleObjectMixin, View):
+    """ "Back to inbox" for a dismissed vacancy. Clears the dismissal, nothing else."""
+
+    model = Vacancy
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(state=Vacancy.State.DISMISSED)
+
+    def post(self, request, *args, **kwargs):
+        vacancy = self.get_object()
+        vacancy.state = Vacancy.State.INBOX
+        vacancy.dismiss_reason = ""
+        vacancy.save(update_fields=["state", "dismiss_reason", "updated_at"])
+        messages.info(request, f"Back in the inbox: {vacancy}.")
+        return redirect(inbox_return_url(request))
 
 
 # --- Applications ---
@@ -210,6 +283,8 @@ class ApplicationListView(OwnerQuerySetMixin, ListView):
         status = self.request.GET.get("status")
         if status in Application.Status.values:
             queryset = queryset.filter(status=status)
+        elif self.request.GET.get("archive") != "1":
+            queryset = queryset.exclude(status__in=Application.CLOSED_STATUSES)
         query = self.request.GET.get("q", "").strip()
         if query:
             queryset = queryset.filter(
@@ -222,6 +297,7 @@ class ApplicationListView(OwnerQuerySetMixin, ListView):
         context["statuses"] = Application.Status.choices
         context["current_status"] = self.request.GET.get("status", "")
         context["query"] = self.request.GET.get("q", "")
+        context["show_archive"] = self.request.GET.get("archive") == "1"
         return context
 
 
@@ -232,13 +308,18 @@ class ApplicationPageMixin(OwnerQuerySetMixin):
     template_name = "tracker/application_detail.html"
 
     def get_queryset(self):
-        # select_related: the one vacancy and company (JOIN).
-        # prefetch_related: the many events and attachments (one extra query each).
+        # select_related: the "one" side — vacancy, company, earlier attempt (JOIN).
+        # prefetch_related: the "many" side — events, attachments, later attempts
+        # (one extra query each).
         return (
             super()
             .get_queryset()
-            .select_related("vacancy__company")
-            .prefetch_related("events", "attachments")
+            .select_related("vacancy__company", "previous_attempt__vacancy")
+            .prefetch_related(
+                "events",
+                "attachments",
+                Prefetch("later_attempts", queryset=Application.objects.select_related("vacancy")),
+            )
         )
 
     def get_context_data(self, **kwargs):

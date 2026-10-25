@@ -83,6 +83,12 @@ class ApplyForm(forms.Form):
     file = forms.FileField(required=False, help_text="CV or cover letter you sent (optional).")
     label = forms.CharField(max_length=100, required=False, help_text='e.g. "CV v3 EN"')
 
+    def __init__(self, *args, previous_attempts=(), **kwargs):
+        super().__init__(*args, **kwargs)
+        # Applying again to a reposted vacancy must be a conscious decision.
+        if previous_attempts:
+            self.fields["apply_again"] = forms.BooleanField(label="Yes, apply again", required=True)
+
     def clean_file(self):
         uploaded = self.cleaned_data["file"]
         if uploaded:

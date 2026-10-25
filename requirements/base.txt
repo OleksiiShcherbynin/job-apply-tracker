@@ -3,3 +3,7 @@ Django>=5.2,<5.3
 # Pinned: newer binary wheels (3.2.13+, 3.3.x) are blocked by Windows
 # Smart App Control on the dev machine (unsigned .pyd without reputation).
 psycopg[binary]==3.2.9
+gunicorn
+whitenoise
+djangorestframework
+drf-spectacular

@@ -11,7 +11,13 @@
       {% if application.vacancy.url %}· <a href="{{ application.vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
     </p>
   </hgroup>
-  {% if application.notes %}<p>{{ application.notes }}</p>{% endif %}
+  {% if application.previous_attempt %}
+    <p><small>Previous attempt: <a href="{{ application.previous_attempt.get_absolute_url }}">{{ application.previous_attempt.applied_at|date:"Y-m-d" }} — {{ application.previous_attempt.get_status_display }}</a></small></p>
+  {% endif %}
+  {% for later in application.later_attempts.all %}
+    <p><small>Later attempt: <a href="{{ later.get_absolute_url }}">{{ later.applied_at|date:"Y-m-d" }} — {{ later.get_status_display }}</a></small></p>
+  {% endfor %}
+  {% if application.notes %}<p>{{ application.notes|linebreaksbr }}</p>{% endif %}
 
   <div class="grid">
     <article>

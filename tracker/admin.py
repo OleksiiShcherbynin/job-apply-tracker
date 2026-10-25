@@ -11,7 +11,8 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(Vacancy)
 class VacancyAdmin(admin.ModelAdmin):
-    list_display = ("title", "company", "state", "score", "source")
+    list_display = ("title", "company", "state", "score", "score_stage", "source")
+    readonly_fields = ("fingerprint",)
     list_filter = ("state", "source")
     search_fields = ("title", "company__name")
 

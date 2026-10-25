@@ -74,3 +74,11 @@ def test_dashboard_num_queries(client, user, django_assert_num_queries):
     # + последние события + число во входящих.
     with django_assert_num_queries(6):
         client.get(reverse("tracker:dashboard"))
+
+
+def test_inbox_count_counts_default_view_only(client, user):
+    VacancyFactory(company__owner=user, score=80)  # default
+    VacancyFactory(company__owner=user, score=10)  # below threshold
+    VacancyFactory(company__owner=user, score=80, first_seen_at=days_ago(30))  # old
+    response = client.get(reverse("tracker:dashboard"))
+    assert response.context["inbox_count"] == 1

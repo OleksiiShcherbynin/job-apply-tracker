@@ -19,6 +19,7 @@ urlpatterns = [
     path("vacancies/<int:pk>/delete/", views.VacancyDeleteView.as_view(), name="vacancy_delete"),
     path("vacancies/<int:pk>/apply/", views.VacancyApplyView.as_view(), name="vacancy_apply"),
     path("vacancies/<int:pk>/dismiss/", views.VacancyDismissView.as_view(), name="vacancy_dismiss"),
+    path("vacancies/<int:pk>/restore/", views.VacancyRestoreView.as_view(), name="vacancy_restore"),
     # Applications
     path("applications/", views.ApplicationListView.as_view(), name="application_list"),
     path(
