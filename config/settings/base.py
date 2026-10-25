@@ -12,9 +12,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "drf_spectacular",
     # local apps
     "accounts",
     "tracker",
+    "api",
 ]
 
 MIDDLEWARE = [
@@ -75,3 +79,20 @@ LOGIN_REDIRECT_URL = "tracker:dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    # The API is machine-to-machine: token only, no session/basic auth, and
+    # nothing is open unless a view says so (the schema views do).
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # One daily batch plus retries is a handful of requests; this is generous.
+    "DEFAULT_THROTTLE_RATES": {"user": "60/hour"},
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "job-apply-tracker API",
+    "DESCRIPTION": "Ingest of scored vacancies pushed by job-ai-assist.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

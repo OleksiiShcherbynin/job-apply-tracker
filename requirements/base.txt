@@ -5,3 +5,5 @@ Django>=5.2,<5.3
 psycopg[binary]==3.2.9
 gunicorn
 whitenoise
+djangorestframework
+drf-spectacular
