@@ -152,3 +152,16 @@ class StatusChangeForm(forms.Form):
                 "To record news without changing it, add an event."
             )
         return status
+
+
+class VacancyDeleteForm(forms.Form):
+    """Deleting a vacancy that has an application takes the whole history with it,
+    so that case needs an explicit tick."""
+
+    def __init__(self, *args, has_application=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if has_application:
+            self.fields["delete_application"] = forms.BooleanField(
+                required=True,
+                label="Also delete its application with the whole timeline and files",
+            )

@@ -29,6 +29,7 @@ from .forms import (
     DismissForm,
     EventForm,
     StatusChangeForm,
+    VacancyDeleteForm,
     VacancyForm,
 )
 from .mixins import OwnerFormMixin, OwnerQuerySetMixin
@@ -168,17 +169,39 @@ class VacancyUpdateView(OwnerQuerySetMixin, OwnerFormMixin, UpdateView):
 
 class VacancyDeleteView(OwnerQuerySetMixin, DeleteView):
     model = Vacancy
+    form_class = VacancyDeleteForm
     success_url = reverse_lazy("tracker:vacancy_list")
 
+    @cached_property
+    def application(self):
+        return Application.objects.filter(vacancy=self.object).first()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["has_application"] = self.application is not None
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.application is not None:
+            context["application"] = self.application
+            context["event_count"] = self.application.events.count()
+            context["attachment_count"] = self.application.attachments.count()
+        return context
+
     def form_valid(self, form):
-        try:
-            return super().form_valid(form)
-        except ProtectedError:
-            messages.error(
-                self.request,
-                f"{self.object} has an application — its history would be lost.",
-            )
-            return redirect("tracker:vacancy_list")
+        # Reaching here with an application means the user ticked the box.
+        stored_files = []
+        with transaction.atomic():
+            if self.application is not None:
+                stored_files = [a.file for a in self.application.attachments.all()]
+                self.application.delete()
+            response = super().form_valid(form)
+        # Uploaded CVs are personal data: don't leave them orphaned on disk.
+        for stored in stored_files:
+            stored.storage.delete(stored.name)
+        messages.info(self.request, f"Deleted: {self.object}.")
+        return response
 
 
 class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):

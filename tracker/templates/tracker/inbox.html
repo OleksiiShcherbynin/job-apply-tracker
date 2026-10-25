@@ -10,7 +10,7 @@
 
   {# GET: toggles only change what is shown, and the URL can be bookmarked. #}
   <form method="get">
-    <fieldset role="group">
+    <fieldset>
       <label>
         <input type="checkbox" name="unprocessed" value="1" {% if show_unprocessed %}checked{% endif %}>
         Unprocessed (older than {{ user.inbox_fresh_days }} days, or dismissed)
@@ -19,8 +19,8 @@
         <input type="checkbox" name="low" value="1" {% if show_low %}checked{% endif %}>
         Score below {{ user.inbox_min_score }}
       </label>
-      <button type="submit" class="secondary">Show</button>
     </fieldset>
+    <button type="submit" class="secondary" style="width: auto">Show</button>
   </form>
 
   {% for vacancy in vacancy_list %}

@@ -6,19 +6,22 @@
   <h1>Applications</h1>
 
   {# GET: searching and filtering only read data, and the URL stays shareable. #}
-  <form method="get" role="search">
-    <input type="search" name="q" value="{{ query }}" placeholder="Title or company">
-    <select name="status">
-      <option value="">Any status</option>
-      {% for value, label in statuses %}
-        <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
+  <form method="get">
+    {# Pico lays a role="group" out as one row: keep only the text-like controls in it. #}
+    <fieldset role="group">
+      <input type="search" name="q" value="{{ query }}" placeholder="Title or company">
+      <select name="status">
+        <option value="">Any status</option>
+        {% for value, label in statuses %}
+          <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Search</button>
+    </fieldset>
     <label>
       <input type="checkbox" name="archive" value="1" {% if show_archive %}checked{% endif %}>
-      Archive (rejected, no response, withdrawn)
+      Show archive (rejected, no response, withdrawn)
     </label>
-    <button type="submit">Search</button>
   </form>
 
   <table>
