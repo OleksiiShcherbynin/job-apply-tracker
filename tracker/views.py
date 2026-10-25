@@ -55,7 +55,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             .select_related("application__vacancy__company")
             .order_by("-happened_at")[:10]
         )
-        context["inbox_count"] = Vacancy.objects.for_owner(user).inbox().count()
+        context["inbox_count"] = Vacancy.objects.for_inbox_view(user).count()
         return context
 
 
@@ -101,9 +101,24 @@ class InboxView(OwnerQuerySetMixin, ListView):
     template_name = "tracker/inbox.html"
 
     def get_queryset(self):
-        # select_related: fetch each vacancy's company in the same query (JOIN),
-        # otherwise the template's {{ vacancy.company }} costs one query per row.
-        return super().get_queryset().inbox().select_related("company")
+        # for_inbox_view also select_related()s the company: one JOIN instead of
+        # a query per card for {{ vacancy.company }}.
+        return Vacancy.objects.for_inbox_view(
+            self.request.user,
+            unprocessed=self.show_unprocessed,
+            below_threshold=self.show_low,
+        )
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.show_unprocessed = request.GET.get("unprocessed") == "1"
+        self.show_low = request.GET.get("low") == "1"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["show_unprocessed"] = self.show_unprocessed
+        context["show_low"] = self.show_low
+        return context
 
 
 class VacancyListView(OwnerQuerySetMixin, ListView):
@@ -193,10 +208,32 @@ class VacancyDismissView(OwnerQuerySetMixin, UpdateView):
     http_method_names = ["post"]
     success_url = reverse_lazy("tracker:inbox")
 
+    def get_queryset(self):
+        # Only undecided vacancies; a stale tab must not dismiss an applied one.
+        return super().get_queryset().filter(state=Vacancy.State.INBOX)
+
     def form_valid(self, form):
         form.instance.state = Vacancy.State.DISMISSED
         messages.info(self.request, f"Dismissed: {form.instance}.")
         return super().form_valid(form)
+
+
+class VacancyRestoreView(OwnerQuerySetMixin, SingleObjectMixin, View):
+    """ "Back to inbox" for a dismissed vacancy. Clears the dismissal, nothing else."""
+
+    model = Vacancy
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(state=Vacancy.State.DISMISSED)
+
+    def post(self, request, *args, **kwargs):
+        vacancy = self.get_object()
+        vacancy.state = Vacancy.State.INBOX
+        vacancy.dismiss_reason = ""
+        vacancy.save(update_fields=["state", "dismiss_reason", "updated_at"])
+        messages.info(request, f"Back in the inbox: {vacancy}.")
+        return redirect("tracker:inbox")
 
 
 # --- Applications ---

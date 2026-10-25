@@ -4,31 +4,58 @@
 
 {% block content %}
   <h1>Inbox</h1>
-  <p>Vacancies waiting for a decision, best score first.
+  <p>Fresh vacancies scored {{ user.inbox_min_score }}+ (and ones you added by hand), best first.
      <a href="{% url 'tracker:vacancy_add' %}">Add one by hand</a>.</p>
+
+  {# GET: toggles only change what is shown, and the URL can be bookmarked. #}
+  <form method="get">
+    <fieldset role="group">
+      <label>
+        <input type="checkbox" name="unprocessed" value="1" {% if show_unprocessed %}checked{% endif %}>
+        Unprocessed (older than {{ user.inbox_fresh_days }} days, or dismissed)
+      </label>
+      <label>
+        <input type="checkbox" name="low" value="1" {% if show_low %}checked{% endif %}>
+        Score below {{ user.inbox_min_score }}
+      </label>
+      <button type="submit" class="secondary">Show</button>
+    </fieldset>
+  </form>
 
   {% for vacancy in vacancy_list %}
     <article>
       <header>
         <strong>{{ vacancy.title }}</strong> — {{ vacancy.company }}
-        {% if vacancy.score is not None %}<mark>score {{ vacancy.score }}</mark>{% endif %}
+        {% if vacancy.score is not None %}
+          <mark>score {{ vacancy.score }}{% if vacancy.score_stage == "rough" %} · rough{% endif %}</mark>
+        {% endif %}
+        {% if vacancy.state == "dismissed" %}<small>· dismissed{% if vacancy.dismiss_reason %}: {{ vacancy.dismiss_reason }}{% endif %}</small>{% endif %}
+        {% if vacancy.has_newer_repost %}<small>· newer repost in inbox</small>{% endif %}
       </header>
       <p>
         {% if vacancy.salary %}{{ vacancy.salary }} · {% endif %}
         {% if vacancy.location %}{{ vacancy.location }} · {% endif %}
         {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
       </p>
-      {% if vacancy.score_reasons %}<p><small>{{ vacancy.score_reasons }}</small></p>{% endif %}
+      {% firstof vacancy.score_reasons_ru vacancy.score_reasons as reasons %}
+      {% if reasons %}<p><small>{{ reasons|linebreaksbr }}</small></p>{% endif %}
       <footer>
         <a href="{% url 'tracker:vacancy_apply' vacancy.pk %}" role="button">I applied</a>
-        <form method="post" action="{% url 'tracker:vacancy_dismiss' vacancy.pk %}">
-          {% csrf_token %}
-          <input type="text" name="dismiss_reason" placeholder="Why not? (optional)">
-          <button type="submit" class="secondary">Dismiss</button>
-        </form>
+        {% if vacancy.state == "dismissed" %}
+          <form method="post" action="{% url 'tracker:vacancy_restore' vacancy.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="secondary">Back to inbox</button>
+          </form>
+        {% else %}
+          <form method="post" action="{% url 'tracker:vacancy_dismiss' vacancy.pk %}">
+            {% csrf_token %}
+            <input type="text" name="dismiss_reason" placeholder="Why not? (optional)">
+            <button type="submit" class="secondary">Dismiss</button>
+          </form>
+        {% endif %}
       </footer>
     </article>
   {% empty %}
-    <p>Inbox is empty. Nice.</p>
+    <p>Nothing to look at right now.</p>
   {% endfor %}
 {% endblock %}
