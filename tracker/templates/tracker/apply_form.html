@@ -4,6 +4,14 @@
   <article>
     <h1>I applied: {{ vacancy.title }}</h1>
     <p>{{ vacancy.company }}</p>
+    {% if previous_attempts %}
+      <p><mark>You already applied to this posting:</mark></p>
+      <ul>
+        {% for attempt in previous_attempts %}
+          <li><a href="{{ attempt.get_absolute_url }}">{{ attempt.applied_at|date:"Y-m-d" }} — {{ attempt.get_status_display }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
     {# multipart/form-data: without it the browser sends only the file NAME, not the file. #}
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}

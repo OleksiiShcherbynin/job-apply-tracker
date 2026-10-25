@@ -108,7 +108,16 @@ class Vacancy(TimeStampedModel):
             kwargs["update_fields"] = {*kwargs["update_fields"], "fingerprint"}
         super().save(*args, **kwargs)
 
-    def mark_applied(self, applied_at, notes=""):
+    def previous_applications(self):
+        """The owner's applications to the same posting under other offer ids."""
+        return (
+            Application.objects.filter(owner=self.owner, vacancy__fingerprint=self.fingerprint)
+            .exclude(vacancy=self)
+            .select_related("vacancy")
+            .order_by("-applied_at", "-pk")
+        )
+
+    def mark_applied(self, applied_at, notes="", previous_attempt=None):
         """Record that the user applied: Application + first timeline event.
 
         The event is dated on applied_at, not "now": an application entered
@@ -116,7 +125,11 @@ class Vacancy(TimeStampedModel):
         """
         with transaction.atomic():
             application = Application.objects.create(
-                owner=self.owner, vacancy=self, applied_at=applied_at, notes=notes
+                owner=self.owner,
+                vacancy=self,
+                applied_at=applied_at,
+                notes=notes,
+                previous_attempt=previous_attempt,
             )
             ApplicationEvent.objects.create(
                 application=application,
@@ -160,6 +173,14 @@ class Application(TimeStampedModel):
     status = models.CharField(max_length=12, choices=Status, default=Status.APPLIED)
     applied_at = models.DateField(default=date.today)
     notes = models.TextField(blank=True)
+    # The earlier application to the same posting (a company repost), if any.
+    previous_attempt = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="later_attempts",
+    )
 
     objects = ApplicationQuerySet.as_manager()
 

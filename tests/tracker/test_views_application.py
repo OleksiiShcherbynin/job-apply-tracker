@@ -91,8 +91,9 @@ def test_application_detail_num_queries(client, user, django_assert_num_queries)
     application = make_application(user)
     EventFactory.create_batch(3, application=application)
     AttachmentFactory.create_batch(2, application=application)
-    # Сессия + пользователь + отклик с вакансией и компанией + события + вложения.
-    with django_assert_num_queries(5):
+    # Сессия + пользователь + отклик с вакансией, компанией и прошлой попыткой
+    # + события + вложения + более поздние попытки.
+    with django_assert_num_queries(6):
         client.get(application.get_absolute_url())
 
 

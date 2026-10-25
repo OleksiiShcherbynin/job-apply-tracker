@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.db import models
-from django.db.models import Exists, F, Max, OuterRef, Q
+from django.db.models import Exists, F, Max, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -59,10 +59,33 @@ class VacancyQuerySet(models.QuerySet):
         if below_threshold:
             wanted |= Q(score__lt=min_score, state__in=[State.INBOX, State.DISMISSED])
 
+        # Facts about the same posting under other offer ids, for the card
+        # markers. Subqueries keep the page at one query however many cards.
+        Application = self.model._meta.get_field("application").related_model
+        earlier_application = (
+            Application.objects.filter(owner=owner, vacancy__fingerprint=OuterRef("fingerprint"))
+            .exclude(vacancy=OuterRef("pk"))
+            .order_by("-applied_at", "-pk")
+        )
+        earlier_dismissal = (
+            self.model.objects.filter(
+                owner=owner, state=State.DISMISSED, fingerprint=OuterRef("fingerprint")
+            )
+            .exclude(pk=OuterRef("pk"))
+            .order_by("-updated_at")
+        )
+
         return (
             self.filter(owner=owner)
             .with_age()
-            .annotate(has_newer_repost=Exists(newer_repost))
+            .annotate(
+                has_newer_repost=Exists(newer_repost),
+                prev_application_pk=Subquery(earlier_application.values("pk")[:1]),
+                prev_applied_at=Subquery(earlier_application.values("applied_at")[:1]),
+                prev_status=Subquery(earlier_application.values("status")[:1]),
+                dismissed_before=Exists(earlier_dismissal),
+                prev_dismiss_reason=Subquery(earlier_dismissal.values("dismiss_reason")[:1]),
+            )
             .filter(wanted)
             .select_related("company")
             .order_by(F("score").desc(nulls_last=True), "-age_at")

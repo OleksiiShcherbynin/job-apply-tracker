@@ -3,10 +3,11 @@ from pathlib import Path
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, ProtectedError, Q
+from django.db.models import Count, Prefetch, ProtectedError, Q
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.functional import cached_property
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -180,6 +181,19 @@ class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
         self.object = self.get_object()
         return self.redirect_if_applied() or super().post(request, *args, **kwargs)
 
+    @cached_property
+    def previous_attempts(self):
+        return list(self.object.previous_applications())
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["previous_attempts"] = self.previous_attempts
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        kwargs.setdefault("previous_attempts", self.previous_attempts)
+        return super().get_context_data(**kwargs)
+
     def redirect_if_applied(self):
         # One application per vacancy (OneToOne): a second click or a stale
         # tab must land on the existing one, not crash on IntegrityError.
@@ -189,7 +203,11 @@ class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
     def form_valid(self, form):
         data = form.cleaned_data
         with transaction.atomic():
-            application = self.object.mark_applied(data["applied_at"], data["notes"])
+            application = self.object.mark_applied(
+                data["applied_at"],
+                data["notes"],
+                previous_attempt=self.previous_attempts[0] if self.previous_attempts else None,
+            )
             if data["file"]:
                 Attachment.objects.create(
                     application=application,
@@ -272,13 +290,18 @@ class ApplicationPageMixin(OwnerQuerySetMixin):
     template_name = "tracker/application_detail.html"
 
     def get_queryset(self):
-        # select_related: the one vacancy and company (JOIN).
-        # prefetch_related: the many events and attachments (one extra query each).
+        # select_related: the "one" side — vacancy, company, earlier attempt (JOIN).
+        # prefetch_related: the "many" side — events, attachments, later attempts
+        # (one extra query each).
         return (
             super()
             .get_queryset()
-            .select_related("vacancy__company")
-            .prefetch_related("events", "attachments")
+            .select_related("vacancy__company", "previous_attempt__vacancy")
+            .prefetch_related(
+                "events",
+                "attachments",
+                Prefetch("later_attempts", queryset=Application.objects.select_related("vacancy")),
+            )
         )
 
     def get_context_data(self, **kwargs):
