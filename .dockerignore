@@ -1,0 +1,14 @@
+.git
+.github
+.superpowers
+.vscode
+.env
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+media
+staticfiles
+**/__pycache__
+docs
+tests

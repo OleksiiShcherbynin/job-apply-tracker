@@ -23,7 +23,7 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_DB: tracker
+          POSTGRES_DB: tracker_dev
           POSTGRES_USER: tracker
           POSTGRES_PASSWORD: devpass
         ports:
