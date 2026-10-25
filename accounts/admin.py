@@ -9,5 +9,5 @@ class UserAdmin(DjangoUserAdmin):
     # Keep the stock auth fieldsets, add our tracker settings section.
     fieldsets = (
         *DjangoUserAdmin.fieldsets,
-        ("Tracker", {"fields": ("follow_up_days",)}),
+        ("Tracker", {"fields": ("follow_up_days", "inbox_min_score", "inbox_fresh_days")}),
     )

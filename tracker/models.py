@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
 
+from .fingerprints import fingerprint
 from .managers import ApplicationQuerySet, VacancyQuerySet
 
 
@@ -46,6 +47,10 @@ class Vacancy(TimeStampedModel):
         MANUAL = "manual", "Manual"
         JOB_AI_ASSIST = "job_ai_assist", "job-ai-assist"
 
+    class ScoreStage(models.TextChoices):
+        ROUGH = "rough", "Rough"
+        FINAL = "final", "Final"
+
     class State(models.TextChoices):
         INBOX = "inbox", "Inbox"
         APPLIED = "applied", "Applied"
@@ -63,16 +68,23 @@ class Vacancy(TimeStampedModel):
         related_name="vacancies",
     )
     title = models.CharField(max_length=255)
-    url = models.URLField(blank=True)
+    url = models.URLField(max_length=500, blank=True)
     source = models.CharField(max_length=20, choices=Source, default=Source.MANUAL)
     # Profesia offer id; basis for idempotent pushes from job-ai-assist.
     # null (not "") on purpose: the conditional unique constraint must skip
     # absent ids, and empty strings would collide with each other.
     external_id = models.CharField(max_length=50, null=True, blank=True)  # noqa: DJ001
     score = models.PositiveSmallIntegerField(null=True, blank=True)
-    score_reasons = models.TextField(blank=True)
-    salary = models.CharField(max_length=100, blank=True)
-    location = models.CharField(max_length=120, blank=True)
+    score_stage = models.CharField(max_length=5, choices=ScoreStage, blank=True)
+    score_reasons = models.TextField(blank=True)  # English
+    score_reasons_ru = models.TextField(blank=True)
+    salary = models.CharField(max_length=200, blank=True)
+    location = models.CharField(max_length=200, blank=True)
+    # When job-ai-assist first saw the offer; the vacancy's age counts from here
+    # (falls back to created_at for hand-entered ones).
+    first_seen_at = models.DateTimeField(null=True, blank=True)
+    # company|title, normalized; how reposts under a new offer id are recognized.
+    fingerprint = models.CharField(max_length=500, db_index=True, editable=False, default="")
     state = models.CharField(max_length=10, choices=State, default=State.INBOX)
     dismiss_reason = models.TextField(blank=True)
 
@@ -89,6 +101,12 @@ class Vacancy(TimeStampedModel):
 
     def __str__(self):
         return f"{self.title} @ {self.company}"
+
+    def save(self, *args, **kwargs):
+        self.fingerprint = fingerprint(self.company.name, self.title)
+        if kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = {*kwargs["update_fields"], "fingerprint"}
+        super().save(*args, **kwargs)
 
     def mark_applied(self, applied_at, notes=""):
         """Record that the user applied: Application + first timeline event.
