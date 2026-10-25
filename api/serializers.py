@@ -16,8 +16,14 @@ class VacancyItemSerializer(serializers.Serializer):
     salary = serializers.CharField(max_length=200, required=False, allow_blank=True)
     score = serializers.IntegerField(min_value=0, max_value=100)
     score_stage = serializers.ChoiceField(choices=Vacancy.ScoreStage.choices)
-    reasons_en = serializers.ListField(child=serializers.CharField(), required=False)
-    reasons_ru = serializers.ListField(child=serializers.CharField(), required=False)
+    # Blank lines are tolerated (and dropped on save): rejecting the whole item
+    # for an empty reason would lose the vacancy, since invalid items aren't retried.
+    reasons_en = serializers.ListField(
+        child=serializers.CharField(allow_blank=True), required=False
+    )
+    reasons_ru = serializers.ListField(
+        child=serializers.CharField(allow_blank=True), required=False
+    )
     first_seen_at = serializers.DateTimeField(required=False, allow_null=True)
 
 

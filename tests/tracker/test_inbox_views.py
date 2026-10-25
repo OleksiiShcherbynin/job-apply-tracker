@@ -186,3 +186,35 @@ def test_inbox_num_queries_with_toggles(client, user, django_assert_num_queries)
     vacancy(user, score=80, state=Vacancy.State.DISMISSED)
     with django_assert_num_queries(3):
         client.get(reverse("tracker:inbox"), {"unprocessed": "1", "low": "1"})
+
+
+def test_dismiss_returns_to_the_same_toggles(client, user):
+    # Found in final review: working through "Unprocessed" lost the toggles
+    # after every click.
+    old = vacancy(user, score=80, first_seen_at=days_ago(20))
+    response = client.post(
+        reverse("tracker:vacancy_dismiss", args=[old.pk]), {"next": "/inbox/?unprocessed=1"}
+    )
+    assert response.url == "/inbox/?unprocessed=1"
+
+
+def test_restore_returns_to_the_same_toggles(client, user):
+    dismissed = vacancy(user, state=Vacancy.State.DISMISSED)
+    response = client.post(
+        reverse("tracker:vacancy_restore", args=[dismissed.pk]), {"next": "/inbox/?unprocessed=1"}
+    )
+    assert response.url == "/inbox/?unprocessed=1"
+
+
+def test_foreign_next_url_is_ignored(client, user):
+    dismissed = vacancy(user, state=Vacancy.State.DISMISSED)
+    response = client.post(
+        reverse("tracker:vacancy_restore", args=[dismissed.pk]), {"next": "https://evil.example/"}
+    )
+    assert response.url == reverse("tracker:inbox")
+
+
+def test_inbox_forms_carry_current_toggles(client, user):
+    vacancy(user, score=80, first_seen_at=days_ago(20))
+    response = client.get(reverse("tracker:inbox"), {"unprocessed": "1"})
+    assertContains(response, 'name="next" value="/inbox/?unprocessed=1"')

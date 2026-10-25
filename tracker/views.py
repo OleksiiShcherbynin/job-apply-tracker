@@ -6,8 +6,9 @@ from django.db import transaction
 from django.db.models import Count, Prefetch, ProtectedError, Q
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.functional import cached_property
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -95,6 +96,20 @@ class CompanyDeleteView(OwnerQuerySetMixin, DeleteView):
 
 
 # --- Vacancies ---
+
+
+def inbox_return_url(request):
+    """Where an inbox action returns: the same toggled view it came from.
+
+    Only same-site paths are trusted; anything else falls back to the plain
+    inbox, so the parameter can't bounce the user to another site.
+    """
+    target = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return target
+    return reverse("tracker:inbox")
 
 
 class InboxView(OwnerQuerySetMixin, ListView):
@@ -230,6 +245,9 @@ class VacancyDismissView(OwnerQuerySetMixin, UpdateView):
         # Only undecided vacancies; a stale tab must not dismiss an applied one.
         return super().get_queryset().filter(state=Vacancy.State.INBOX)
 
+    def get_success_url(self):
+        return inbox_return_url(self.request)
+
     def form_valid(self, form):
         form.instance.state = Vacancy.State.DISMISSED
         messages.info(self.request, f"Dismissed: {form.instance}.")
@@ -251,7 +269,7 @@ class VacancyRestoreView(OwnerQuerySetMixin, SingleObjectMixin, View):
         vacancy.dismiss_reason = ""
         vacancy.save(update_fields=["state", "dismiss_reason", "updated_at"])
         messages.info(request, f"Back in the inbox: {vacancy}.")
-        return redirect("tracker:inbox")
+        return redirect(inbox_return_url(request))
 
 
 # --- Applications ---

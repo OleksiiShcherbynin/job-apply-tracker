@@ -41,3 +41,28 @@ def test_backfill_migration_fills_existing_rows():
     backfill(apps, None)
     vacancy.refresh_from_db()
     assert vacancy.fingerprint == "softec|junior python"
+
+
+@pytest.mark.django_db
+def test_company_rename_recomputes_vacancy_fingerprints():
+    # Found in final review: a fixed company typo left stale fingerprints,
+    # so adoption and repost markers silently stopped matching.
+    from tracker.ingest import ingest_vacancy
+
+    vacancy = VacancyFactory(company__name="Sotfec", title="Junior Dev")
+    company = vacancy.company
+    company.name = "Softec"
+    company.save()
+    vacancy.refresh_from_db()
+    assert vacancy.fingerprint == "softec|junior dev"
+
+    data = {
+        "external_id": "O9",
+        "title": "Junior Dev",
+        "company": "Softec",
+        "url": "https://example.com/O9",
+        "score": 70,
+        "score_stage": "final",
+    }
+    adopted, status = ingest_vacancy(company.owner, data)
+    assert (adopted.pk, status) == (vacancy.pk, "updated")

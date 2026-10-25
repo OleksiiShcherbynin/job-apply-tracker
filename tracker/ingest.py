@@ -70,9 +70,13 @@ def _adopt(vacancy: Vacancy, data: dict) -> None:
 def _set_reasons(vacancy: Vacancy, data: dict) -> None:
     # An omitted key means "no news about reasons" and keeps what is stored.
     if "reasons_en" in data:
-        vacancy.score_reasons = "\n".join(data["reasons_en"])
+        vacancy.score_reasons = _lines(data["reasons_en"])
     if "reasons_ru" in data:
-        vacancy.score_reasons_ru = "\n".join(data["reasons_ru"])
+        vacancy.score_reasons_ru = _lines(data["reasons_ru"])
+
+
+def _lines(reasons: list[str]) -> str:
+    return "\n".join(reason.strip() for reason in reasons if reason.strip())
 
 
 def _matching_manual_vacancy(owner, company_name: str, title: str) -> Vacancy | None:

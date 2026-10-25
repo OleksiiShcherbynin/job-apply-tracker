@@ -50,11 +50,13 @@
         {% if vacancy.state == "dismissed" %}
           <form method="post" action="{% url 'tracker:vacancy_restore' vacancy.pk %}">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
             <button type="submit" class="secondary">Back to inbox</button>
           </form>
         {% else %}
           <form method="post" action="{% url 'tracker:vacancy_dismiss' vacancy.pk %}">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
             <input type="text" name="dismiss_reason" placeholder="Why not? (optional)">
             <button type="submit" class="secondary">Dismiss</button>
           </form>

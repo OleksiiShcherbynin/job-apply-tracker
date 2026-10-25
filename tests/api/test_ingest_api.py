@@ -97,3 +97,14 @@ def test_body_that_is_a_list_is_400(api):
 def test_schema_and_swagger_respond(client):
     assert client.get(reverse("api:schema")).status_code == 200
     assert client.get(reverse("api:swagger-ui")).status_code == 200
+
+
+def test_blank_reason_lines_do_not_reject_the_item(api, user):
+    # Found in final review: one empty string from the scorer would make the
+    # vacancy "invalid" forever (the sender does not retry invalid items).
+    item = payload("O7", reasons_en=["Python matches", ""], reasons_ru=["", "Подходит"])
+    response = api.post(URL, {"vacancies": [item]}, format="json")
+    assert response.json()["results"][0]["status"] == "created"
+    vacancy = Vacancy.objects.get(owner=user, external_id="O7")
+    assert vacancy.score_reasons == "Python matches"
+    assert vacancy.score_reasons_ru == "Подходит"

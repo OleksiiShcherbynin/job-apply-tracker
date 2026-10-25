@@ -41,6 +41,23 @@ class Company(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        renamed = self.pk is not None and getattr(self, "_loaded_name", self.name) != self.name
+        super().save(*args, **kwargs)
+        self._loaded_name = self.name
+        if renamed:
+            # Vacancy fingerprints embed the company name; keep them in step.
+            for vacancy in self.vacancies.all():
+                vacancy.company = self
+                vacancy.save(update_fields=["fingerprint"])
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        # Remember the name as loaded, so save() can tell a rename.
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_name = instance.__dict__.get("name")
+        return instance
+
 
 class Vacancy(TimeStampedModel):
     class Source(models.TextChoices):
