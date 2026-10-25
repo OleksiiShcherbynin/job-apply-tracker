@@ -155,7 +155,9 @@ One entry per decision: context → decision → consequence.
    `(owner, …)` are not checked by the form and a duplicate would surface as a 500. →
    `OwnedModelForm` + `clean_<field>`; the DB constraint stays as the safety net.
 6. **`PROTECT` on company → vacancy → application, with friendly errors.** Deleting a company must not
-   silently erase applications and their history. → Delete views catch `ProtectedError` and show a message.
+   silently erase applications and their history. → Deleting a company with vacancies shows a message;
+   deleting a vacancy with an application is allowed only after an explicit tick on the confirm page,
+   which names what goes with it (application, timeline, stored files).
 7. **First event dated on `applied_at`.** Otherwise an application entered a few days late looks fresh
    and drops out of needs attention.
 8. **One application per vacancy; double "I applied" redirects.** Matches reality, keeps forms simple;
