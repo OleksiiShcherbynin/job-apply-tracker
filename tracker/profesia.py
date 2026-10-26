@@ -13,7 +13,10 @@ def profesia_offer_id(url: str) -> str | None:
     Only the last path segment counts, so company and search pages, and
     look-alike paths on other sites, give None.
     """
-    parts = urlsplit(url)
+    try:
+        parts = urlsplit(url)
+    except ValueError:  # e.g. a broken IPv6 host; never block a save or a migration
+        return None
     if parts.hostname not in _HOSTS:
         return None
     segments = [segment for segment in parts.path.split("/") if segment]

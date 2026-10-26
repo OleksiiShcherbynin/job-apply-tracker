@@ -23,6 +23,8 @@ OFFER_URL = "https://www.profesia.sk/praca/builtmind/O5330945"
         ("https://example.com/jobs/O5330945", None),
         ("", None),
         ("not a url", None),
+        # urlsplit raises on this; migration 0009 runs at container start.
+        ("http://[abc", None),
     ],
 )
 def test_offer_id_from_url(url, expected):
