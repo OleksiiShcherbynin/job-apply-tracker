@@ -22,9 +22,7 @@ def report_closed(owner, external_id: str, seen_at) -> str:
     with transaction.atomic():
         # The row lock makes a report repeated in parallel wait and see closed_at.
         vacancy = (
-            Vacancy.objects.select_for_update()
-            .filter(owner=owner, external_id=external_id)
-            .first()
+            Vacancy.objects.select_for_update().filter(owner=owner, external_id=external_id).first()
         )
         if vacancy is None:
             return "unknown"

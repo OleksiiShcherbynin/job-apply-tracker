@@ -30,9 +30,8 @@ class VacancyQuerySet(models.QuerySet):
         """
         Status = self.model._meta.get_field("application").related_model.Status
         waiting = Q(application__status=Status.APPLIED)
-        undecided = (
-            Q(application__isnull=True, state=self.model.State.INBOX)
-            & (Q(score__gte=owner.inbox_min_score) | Q(score__isnull=True))
+        undecided = Q(application__isnull=True, state=self.model.State.INBOX) & (
+            Q(score__gte=owner.inbox_min_score) | Q(score__isnull=True)
         )
         return self.filter(
             waiting | undecided,
