@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from .fingerprints import fingerprint
 from .managers import ApplicationQuerySet, VacancyQuerySet
+from .profesia import profesia_offer_id
 
 
 class TimeStampedModel(models.Model):
@@ -125,7 +126,26 @@ class Vacancy(TimeStampedModel):
         self.fingerprint = fingerprint(self.company.name, self.title)
         if kwargs.get("update_fields") is not None:
             kwargs["update_fields"] = {*kwargs["update_fields"], "fingerprint"}
+        elif self.external_id is None:
+            # Only full saves (the forms): status changes and renames stay one query.
+            self.external_id = self._free_offer_id_from_url()
         super().save(*args, **kwargs)
+
+    def _free_offer_id_from_url(self):
+        """The Profesia offer id in the link, unless another of the owner's vacancies has it.
+
+        Without an offer id a hand-entered Profesia vacancy would never be
+        checked for closing, and pushes from job-ai-assist could not find it.
+        """
+        offer_id = profesia_offer_id(self.url)
+        if offer_id is None:
+            return None
+        taken = (
+            Vacancy.objects.filter(owner_id=self.owner_id, external_id=offer_id)
+            .exclude(pk=self.pk)
+            .exists()
+        )
+        return None if taken else offer_id
 
     def previous_applications(self):
         """The owner's applications to the same posting under other offer ids."""
