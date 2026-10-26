@@ -44,3 +44,36 @@ class IngestResultSerializer(serializers.Serializer):
 
 class IngestResponseSerializer(serializers.Serializer):
     results = IngestResultSerializer(many=True)
+
+
+class ClosedItemSerializer(serializers.Serializer):
+    """One closed posting as job-ai-assist reports it (the Stage 3 spec)."""
+
+    external_id = serializers.CharField(max_length=50)
+    seen_at = serializers.DateTimeField()
+
+
+class ClosedBatchSerializer(serializers.Serializer):
+    # Raw items, validated one by one, as in VacancyBatchSerializer.
+    closed = serializers.ListField(
+        child=serializers.JSONField(), max_length=MAX_BATCH, allow_empty=True
+    )
+
+
+class ClosedResultSerializer(serializers.Serializer):
+    external_id = serializers.CharField()
+    status = serializers.ChoiceField(choices=["closed", "unchanged", "unknown", "invalid"])
+    errors = serializers.DictField(required=False)
+
+
+class ClosedResponseSerializer(serializers.Serializer):
+    results = ClosedResultSerializer(many=True)
+
+
+class OfferToCheckSerializer(serializers.Serializer):
+    external_id = serializers.CharField()
+    url = serializers.URLField()
+
+
+class ToCheckResponseSerializer(serializers.Serializer):
+    vacancies = OfferToCheckSerializer(many=True)
