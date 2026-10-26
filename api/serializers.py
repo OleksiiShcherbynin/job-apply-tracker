@@ -44,3 +44,12 @@ class IngestResultSerializer(serializers.Serializer):
 
 class IngestResponseSerializer(serializers.Serializer):
     results = IngestResultSerializer(many=True)
+
+
+class OfferToCheckSerializer(serializers.Serializer):
+    external_id = serializers.CharField()
+    url = serializers.URLField()
+
+
+class ToCheckResponseSerializer(serializers.Serializer):
+    vacancies = OfferToCheckSerializer(many=True)

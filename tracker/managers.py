@@ -22,6 +22,25 @@ class VacancyQuerySet(models.QuerySet):
         # ones count from when they were typed in.
         return self.annotate(age_at=Coalesce("first_seen_at", "created_at"))
 
+    def to_check(self, owner):
+        """The owner's offers worth checking for a closed posting.
+
+        An application still waiting for an answer, or an inbox vacancy the
+        author would see (scored at least inbox_min_score, or unscored).
+        """
+        Status = self.model._meta.get_field("application").related_model.Status
+        waiting = Q(application__status=Status.APPLIED)
+        undecided = (
+            Q(application__isnull=True, state=self.model.State.INBOX)
+            & (Q(score__gte=owner.inbox_min_score) | Q(score__isnull=True))
+        )
+        return self.filter(
+            waiting | undecided,
+            owner=owner,
+            external_id__isnull=False,
+            closed_at__isnull=True,
+        ).order_by("external_id")
+
     def for_inbox_view(self, owner, *, default=True, unprocessed=False, below_threshold=False):
         """The owner's not-applied vacancies for the chosen inbox views.
 

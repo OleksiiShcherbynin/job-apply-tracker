@@ -8,6 +8,9 @@ app_name = "api"
 
 urlpatterns = [
     path("v1/vacancies/", views.VacancyIngestView.as_view(), name="vacancy-ingest"),
+    path(
+        "v1/vacancies/to-check/", views.VacancyToCheckView.as_view(), name="vacancy-to-check"
+    ),
     # The schema describes the contract and holds no data, so it is public.
     path(
         "schema/",

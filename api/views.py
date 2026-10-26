@@ -4,9 +4,11 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
 from tracker.ingest import ingest_vacancy
+from tracker.models import Vacancy
 
 from .serializers import (
     IngestResponseSerializer,
+    ToCheckResponseSerializer,
     VacancyBatchSerializer,
     VacancyItemSerializer,
 )
@@ -42,3 +44,14 @@ class VacancyIngestView(APIView):
             }
         vacancy, status = ingest_vacancy(owner, serializer.validated_data)
         return {"external_id": vacancy.external_id, "status": status, "id": vacancy.pk}
+
+
+class VacancyToCheckView(APIView):
+    """The token owner's offers job-ai-assist should check for a closed posting."""
+
+    throttle_classes = [UserRateThrottle]
+
+    @extend_schema(responses=ToCheckResponseSerializer)
+    def get(self, request):
+        offers = Vacancy.objects.to_check(request.user).values("external_id", "url")
+        return Response({"vacancies": list(offers)})
