@@ -1,7 +1,7 @@
 # Stage 3 — closed Profesia postings close themselves
 
 Date: 2026-10-26
-Status: reviewed by a builder check, awaiting the author's approval
+Status: approved by the author (2026-10-26)
 Builds on: [Stage 2 design](2026-10-24-stage2-push-api-design.md), [architecture as built](../../architecture.md)
 
 ## Why
