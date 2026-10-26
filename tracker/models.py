@@ -104,6 +104,8 @@ class Vacancy(TimeStampedModel):
     fingerprint = models.CharField(max_length=500, db_index=True, editable=False, default="")
     state = models.CharField(max_length=10, choices=State, default=State.INBOX)
     dismiss_reason = models.TextField(blank=True)
+    # When the tracker learned the posting closed (reported by job-ai-assist).
+    closed_at = models.DateTimeField(null=True, blank=True)
 
     objects = VacancyQuerySet.as_manager()
 

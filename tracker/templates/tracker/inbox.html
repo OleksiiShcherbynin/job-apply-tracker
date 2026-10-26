@@ -32,6 +32,7 @@
         {% endif %}
         {% if vacancy.state == "dismissed" %}<small>· dismissed{% if vacancy.dismiss_reason %}: {{ vacancy.dismiss_reason }}{% endif %}</small>{% endif %}
         {% if vacancy.has_newer_repost %}<small>· newer repost in inbox</small>{% endif %}
+        {% if vacancy.closed_at %}<small>· Closed on Profesia ({{ vacancy.closed_at|date:"Y-m-d" }})</small>{% endif %}
         {% if vacancy.prev_application_pk %}
           <br><small>⚠ <a href="{% url 'tracker:application_detail' vacancy.prev_application_pk %}">Already applied on {{ vacancy.prev_applied_at|date:"Y-m-d" }} — {{ vacancy.prev_status|status_label }}</a></small>
         {% elif vacancy.dismissed_before %}

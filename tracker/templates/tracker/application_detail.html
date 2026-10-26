@@ -9,6 +9,7 @@
       {{ application.vacancy.company }} · <strong>{{ application.get_status_display }}</strong>
       · applied {{ application.applied_at }}
       {% if application.vacancy.url %}· <a href="{{ application.vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
+      {% if application.vacancy.closed_at %}· Closed on Profesia ({{ application.vacancy.closed_at|date:"Y-m-d" }}){% endif %}
     </p>
   </hgroup>
   {% if application.previous_attempt %}
