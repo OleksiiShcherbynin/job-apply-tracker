@@ -40,3 +40,9 @@ def test_dashboard_shows_user_and_logout_button(client):
     response = client.get(reverse("tracker:dashboard"))
     assertContains(response, "alexei")
     assertContains(response, f'action="{reverse("logout")}"')
+
+
+def test_pages_link_the_site_icon(client):
+    response = client.get(reverse("login"))
+    assertContains(response, 'rel="icon"')
+    assertContains(response, "favicon.svg")
