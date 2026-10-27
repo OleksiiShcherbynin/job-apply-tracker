@@ -1,21 +1,22 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Vacancies · Job Apply Tracker{% endblock %}
+{% block title %}{% translate "Vacancies" %} · Job Apply Tracker{% endblock %}
 
 {% block content %}
-  <h1>Vacancies</h1>
+  <h1>{% translate "Vacancies" %}</h1>
   <p>
-    Show:
-    <a href="{% url 'tracker:vacancy_list' %}">all</a>
+    {% translate "Show:" %}
+    <a href="{% url 'tracker:vacancy_list' %}">{% translate "all" %}</a>
     {% for value, label in states %}
       · <a href="?state={{ value }}">{% if value == current_state %}<strong>{{ label }}</strong>{% else %}{{ label }}{% endif %}</a>
     {% endfor %}
-    — <a href="{% url 'tracker:vacancy_add' %}">add vacancy</a>
+    — <a href="{% url 'tracker:vacancy_add' %}">{% translate "add vacancy" %}</a>
   </p>
 
   <table>
     <thead>
-      <tr><th>Title</th><th>Company</th><th>State</th><th>Score</th><th></th></tr>
+      <tr><th>{% translate "Title" %}</th><th>{% translate "Company" %}</th><th>{% translate "State" %}</th><th>{% translate "Score" %}</th><th></th></tr>
     </thead>
     <tbody>
       {% for vacancy in vacancy_list %}
@@ -25,12 +26,12 @@
           <td>{{ vacancy.get_state_display }}</td>
           <td>{{ vacancy.score|default:"—" }}</td>
           <td>
-            <a href="{% url 'tracker:vacancy_edit' vacancy.pk %}">Edit</a> ·
-            <a href="{% url 'tracker:vacancy_delete' vacancy.pk %}">Delete</a>
+            <a href="{% url 'tracker:vacancy_edit' vacancy.pk %}">{% translate "Edit" %}</a> ·
+            <a href="{% url 'tracker:vacancy_delete' vacancy.pk %}">{% translate "Delete" %}</a>
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="5">Nothing here.</td></tr>
+        <tr><td colspan="5">{% translate "Nothing here." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

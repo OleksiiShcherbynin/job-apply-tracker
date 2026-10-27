@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.functional import cached_property
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext as _
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -91,7 +92,8 @@ class CompanyDeleteView(OwnerQuerySetMixin, DeleteView):
         except ProtectedError:
             messages.error(
                 self.request,
-                f"{self.object} has vacancies — delete or move them first.",
+                _("%(company)s has vacancies — delete or move them first.")
+                % {"company": self.object},
             )
             return redirect("tracker:company_list")
 
@@ -200,7 +202,7 @@ class VacancyDeleteView(OwnerQuerySetMixin, DeleteView):
         # Uploaded CVs are personal data: don't leave them orphaned on disk.
         for stored in stored_files:
             stored.storage.delete(stored.name)
-        messages.info(self.request, f"Deleted: {self.object}.")
+        messages.info(self.request, _("Deleted: %(vacancy)s.") % {"vacancy": self.object})
         return response
 
 
@@ -252,7 +254,7 @@ class VacancyApplyView(OwnerQuerySetMixin, SingleObjectMixin, FormView):
                     file=data["file"],
                     label=data["label"],
                 )
-        messages.success(self.request, f"Applied: {self.object}.")
+        messages.success(self.request, _("Applied: %(vacancy)s.") % {"vacancy": self.object})
         return redirect(application)
 
 
@@ -273,7 +275,7 @@ class VacancyDismissView(OwnerQuerySetMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.state = Vacancy.State.DISMISSED
-        messages.info(self.request, f"Dismissed: {form.instance}.")
+        messages.info(self.request, _("Dismissed: %(vacancy)s.") % {"vacancy": form.instance})
         return super().form_valid(form)
 
 
@@ -291,7 +293,7 @@ class VacancyRestoreView(OwnerQuerySetMixin, SingleObjectMixin, View):
         vacancy.state = Vacancy.State.INBOX
         vacancy.dismiss_reason = ""
         vacancy.save(update_fields=["state", "dismiss_reason", "updated_at"])
-        messages.info(request, f"Back in the inbox: {vacancy}.")
+        messages.info(request, _("Back in the inbox: %(vacancy)s.") % {"vacancy": vacancy})
         return redirect(inbox_return_url(request))
 
 

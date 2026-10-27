@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
   <article>
-    <h1>{% if object %}Edit {{ object.name }}{% else %}New company{% endif %}</h1>
+    <h1>{% if object %}{% blocktranslate trimmed with name=object.name %}Edit {{ name }}{% endblocktranslate %}{% else %}{% translate "New company" %}{% endif %}</h1>
     <form method="post">
       {% csrf_token %}
       {{ form.as_div }}
-      <button type="submit">Save</button>
-      <a href="{% url 'tracker:company_list' %}">Cancel</a>
+      <button type="submit">{% translate "Save" %}</button>
+      <a href="{% url 'tracker:company_list' %}">{% translate "Cancel" %}</a>
     </form>
   </article>
 {% endblock %}

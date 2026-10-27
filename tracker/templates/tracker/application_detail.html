@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}{{ application.vacancy.title }} · Job Apply Tracker{% endblock %}
 
@@ -7,40 +8,40 @@
     <h1>{{ application.vacancy.title }}</h1>
     <p>
       {{ application.vacancy.company }} · <strong>{{ application.get_status_display }}</strong>
-      · applied {{ application.applied_at }}
-      {% if application.vacancy.url %}· <a href="{{ application.vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
-      {% if application.vacancy.closed_at %}· Closed on Profesia ({{ application.vacancy.closed_at|date:"Y-m-d" }}){% endif %}
+      · {% blocktranslate trimmed with date=application.applied_at %}applied {{ date }}{% endblocktranslate %}
+      {% if application.vacancy.url %}· <a href="{{ application.vacancy.url }}" target="_blank" rel="noopener">{% translate "posting" %}</a>{% endif %}
+      {% if application.vacancy.closed_at %}· {% blocktranslate trimmed with date=application.vacancy.closed_at|date:"Y-m-d" %}Closed on Profesia ({{ date }}){% endblocktranslate %}{% endif %}
     </p>
   </hgroup>
   {% if application.previous_attempt %}
-    <p><small>Previous attempt: <a href="{{ application.previous_attempt.get_absolute_url }}">{{ application.previous_attempt.applied_at|date:"Y-m-d" }} — {{ application.previous_attempt.get_status_display }}</a></small></p>
+    <p><small>{% translate "Previous attempt:" %} <a href="{{ application.previous_attempt.get_absolute_url }}">{{ application.previous_attempt.applied_at|date:"Y-m-d" }} — {{ application.previous_attempt.get_status_display }}</a></small></p>
   {% endif %}
   {% for later in application.later_attempts.all %}
-    <p><small>Later attempt: <a href="{{ later.get_absolute_url }}">{{ later.applied_at|date:"Y-m-d" }} — {{ later.get_status_display }}</a></small></p>
+    <p><small>{% translate "Later attempt:" %} <a href="{{ later.get_absolute_url }}">{{ later.applied_at|date:"Y-m-d" }} — {{ later.get_status_display }}</a></small></p>
   {% endfor %}
   {% if application.notes %}<p>{{ application.notes|linebreaksbr }}</p>{% endif %}
 
   <div class="grid">
     <article>
-      <h2>Change status</h2>
+      <h2>{% translate "Change status" %}</h2>
       <form method="post" action="{% url 'tracker:application_change_status' application.pk %}">
         {% csrf_token %}
         {{ status_form.as_div }}
-        <button type="submit">Update status</button>
+        <button type="submit">{% translate "Update status" %}</button>
       </form>
     </article>
 
     <article>
-      <h2>Add event</h2>
+      <h2>{% translate "Add event" %}</h2>
       <form method="post" action="{% url 'tracker:application_add_event' application.pk %}">
         {% csrf_token %}
         {{ event_form.as_div }}
-        <button type="submit">Add to timeline</button>
+        <button type="submit">{% translate "Add to timeline" %}</button>
       </form>
     </article>
   </div>
 
-  <h2>Timeline</h2>
+  <h2>{% translate "Timeline" %}</h2>
   <ul>
     {% for event in application.events.all %}
       <li>
@@ -48,21 +49,21 @@
         {% if event.text %}: {{ event.text }}{% endif %}
       </li>
     {% empty %}
-      <li>Nothing yet.</li>
+      <li>{% translate "Nothing yet." %}</li>
     {% endfor %}
   </ul>
 
-  <h2>Attachments</h2>
+  <h2>{% translate "Attachments" %}</h2>
   <ul>
     {% for attachment in application.attachments.all %}
       <li><a href="{% url 'tracker:attachment_download' attachment.pk %}">{{ attachment.label }}</a> <small>({{ attachment.created_at|date:"Y-m-d" }})</small></li>
     {% empty %}
-      <li>None.</li>
+      <li>{% translate "None." %}</li>
     {% endfor %}
   </ul>
   <form method="post" action="{% url 'tracker:application_add_attachment' application.pk %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ attachment_form.as_div }}
-    <button type="submit" class="secondary">Upload</button>
+    <button type="submit" class="secondary">{% translate "Upload" %}</button>
   </form>
 {% endblock %}

@@ -1,26 +1,30 @@
 {% extends "base.html" %}
-{% load tracker_extras %}
+{% load i18n tracker_extras %}
 
-{% block title %}Inbox · Job Apply Tracker{% endblock %}
+{% block title %}{% translate "Inbox" %} · Job Apply Tracker{% endblock %}
 
 {% block content %}
-  <h1>Inbox</h1>
-  <p>Fresh vacancies scored {{ user.inbox_min_score }}+ (and ones you added by hand), best first.
-     <a href="{% url 'tracker:vacancy_add' %}">Add one by hand</a>.</p>
+  <h1>{% translate "Inbox" %}</h1>
+  <p>{% blocktranslate trimmed with score=user.inbox_min_score %}
+       Fresh vacancies scored {{ score }}+ (and ones you added by hand), best first.
+     {% endblocktranslate %}
+     <a href="{% url 'tracker:vacancy_add' %}">{% translate "Add one by hand" %}</a>.</p>
 
   {# GET: toggles only change what is shown, and the URL can be bookmarked. #}
   <form method="get">
     <fieldset>
       <label>
         <input type="checkbox" name="unprocessed" value="1" {% if show_unprocessed %}checked{% endif %}>
-        Unprocessed (older than {{ user.inbox_fresh_days }} days, or dismissed)
+        {% blocktranslate trimmed with days=user.inbox_fresh_days %}
+          Unprocessed (older than {{ days }} days, or dismissed)
+        {% endblocktranslate %}
       </label>
       <label>
         <input type="checkbox" name="low" value="1" {% if show_low %}checked{% endif %}>
-        Score below {{ user.inbox_min_score }}
+        {% blocktranslate trimmed with score=user.inbox_min_score %}Score below {{ score }}{% endblocktranslate %}
       </label>
     </fieldset>
-    <button type="submit" class="secondary" style="width: auto">Show</button>
+    <button type="submit" class="secondary" style="width: auto">{% translate "Show" %}</button>
   </form>
 
   {% for vacancy in vacancy_list %}
@@ -28,43 +32,43 @@
       <header>
         <strong>{{ vacancy.title }}</strong> — {{ vacancy.company }}
         {% if vacancy.score is not None %}
-          <mark>score {{ vacancy.score }}{% if vacancy.score_stage == "rough" %} · rough{% endif %}</mark>
+          <mark>{% blocktranslate trimmed with score=vacancy.score %}score {{ score }}{% endblocktranslate %}{% if vacancy.score_stage == "rough" %} · {% translate "rough" %}{% endif %}</mark>
         {% endif %}
-        {% if vacancy.state == "dismissed" %}<small>· dismissed{% if vacancy.dismiss_reason %}: {{ vacancy.dismiss_reason }}{% endif %}</small>{% endif %}
-        {% if vacancy.has_newer_repost %}<small>· newer repost in inbox</small>{% endif %}
-        {% if vacancy.closed_at %}<small>· Closed on Profesia ({{ vacancy.closed_at|date:"Y-m-d" }})</small>{% endif %}
+        {% if vacancy.state == "dismissed" %}<small>· {% translate "dismissed" %}{% if vacancy.dismiss_reason %}: {{ vacancy.dismiss_reason }}{% endif %}</small>{% endif %}
+        {% if vacancy.has_newer_repost %}<small>· {% translate "newer repost in inbox" %}</small>{% endif %}
+        {% if vacancy.closed_at %}<small>· {% blocktranslate trimmed with date=vacancy.closed_at|date:"Y-m-d" %}Closed on Profesia ({{ date }}){% endblocktranslate %}</small>{% endif %}
         {% if vacancy.prev_application_pk %}
-          <br><small>⚠ <a href="{% url 'tracker:application_detail' vacancy.prev_application_pk %}">Already applied on {{ vacancy.prev_applied_at|date:"Y-m-d" }} — {{ vacancy.prev_status|status_label }}</a></small>
+          <br><small>⚠ <a href="{% url 'tracker:application_detail' vacancy.prev_application_pk %}">{% blocktranslate trimmed with date=vacancy.prev_applied_at|date:"Y-m-d" status=vacancy.prev_status|status_label %}Already applied on {{ date }} — {{ status }}{% endblocktranslate %}</a></small>
         {% elif vacancy.dismissed_before %}
-          <br><small>Dismissed before{% if vacancy.prev_dismiss_reason %}: {{ vacancy.prev_dismiss_reason }}{% endif %}</small>
+          <br><small>{% translate "Dismissed before" %}{% if vacancy.prev_dismiss_reason %}: {{ vacancy.prev_dismiss_reason }}{% endif %}</small>
         {% endif %}
       </header>
       <p>
         {% if vacancy.salary %}{{ vacancy.salary }} · {% endif %}
         {% if vacancy.location %}{{ vacancy.location }} · {% endif %}
-        {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener">posting</a>{% endif %}
+        {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener">{% translate "posting" %}</a>{% endif %}
       </p>
       {% firstof vacancy.score_reasons_ru vacancy.score_reasons as reasons %}
       {% if reasons %}<p><small>{{ reasons|linebreaksbr }}</small></p>{% endif %}
       <footer>
-        <a href="{% url 'tracker:vacancy_apply' vacancy.pk %}" role="button">I applied</a>
+        <a href="{% url 'tracker:vacancy_apply' vacancy.pk %}" role="button">{% translate "I applied" %}</a>
         {% if vacancy.state == "dismissed" %}
           <form method="post" action="{% url 'tracker:vacancy_restore' vacancy.pk %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit" class="secondary">Back to inbox</button>
+            <button type="submit" class="secondary">{% translate "Back to inbox" %}</button>
           </form>
         {% else %}
           <form method="post" action="{% url 'tracker:vacancy_dismiss' vacancy.pk %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <input type="text" name="dismiss_reason" placeholder="Why not? (optional)">
-            <button type="submit" class="secondary">Dismiss</button>
+            <input type="text" name="dismiss_reason" placeholder="{% translate "Why not? (optional)" %}">
+            <button type="submit" class="secondary">{% translate "Dismiss" %}</button>
           </form>
         {% endif %}
       </footer>
     </article>
   {% empty %}
-    <p>Nothing to look at right now.</p>
+    <p>{% translate "Nothing to look at right now." %}</p>
   {% endfor %}
 {% endblock %}

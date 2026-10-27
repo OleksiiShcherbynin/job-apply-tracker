@@ -17,30 +17,30 @@
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.get_full_path }}">
           {% get_available_languages as languages %}
-          <select name="language" aria-label="Language" onchange="this.form.submit()">
+          <select name="language" aria-label="{% translate "Language" %}" onchange="this.form.submit()">
             {% for code, name in languages %}
               <option value="{{ code }}"{% if code == LANGUAGE_CODE %} selected{% endif %}>{{ code|upper }}</option>
             {% endfor %}
           </select>
-          <noscript><button type="submit" class="secondary">OK</button></noscript>
+          <noscript><button type="submit" class="secondary">{% translate "OK" %}</button></noscript>
         </form>
         {% if user.is_authenticated %}
           <span class="username">{{ user.username }}</span>
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="submit" class="secondary outline">Log out</button>
+            <button type="submit" class="secondary outline">{% translate "Log out" %}</button>
           </form>
         {% endif %}
       </div>
     </div>
     {% if user.is_authenticated %}
       {% nav_section request as section %}
-      <nav class="sections" aria-label="Sections">
-        <a href="{% url 'tracker:dashboard' %}" class="pill"{% if section == "dashboard" %} aria-current="page"{% endif %}>Dashboard</a>
-        <a href="{% url 'tracker:inbox' %}" class="pill"{% if section == "inbox" %} aria-current="page"{% endif %}>Inbox</a>
-        <a href="{% url 'tracker:application_list' %}" class="pill"{% if section == "applications" %} aria-current="page"{% endif %}>Applications</a>
-        <a href="{% url 'tracker:vacancy_list' %}" class="pill"{% if section == "vacancies" %} aria-current="page"{% endif %}>Vacancies</a>
-        <a href="{% url 'tracker:company_list' %}" class="pill"{% if section == "companies" %} aria-current="page"{% endif %}>Companies</a>
+      <nav class="sections" aria-label="{% translate "Sections" %}">
+        <a href="{% url 'tracker:dashboard' %}" class="pill"{% if section == "dashboard" %} aria-current="page"{% endif %}>{% translate "Dashboard" %}</a>
+        <a href="{% url 'tracker:inbox' %}" class="pill"{% if section == "inbox" %} aria-current="page"{% endif %}>{% translate "Inbox" %}</a>
+        <a href="{% url 'tracker:application_list' %}" class="pill"{% if section == "applications" %} aria-current="page"{% endif %}>{% translate "Applications" %}</a>
+        <a href="{% url 'tracker:vacancy_list' %}" class="pill"{% if section == "vacancies" %} aria-current="page"{% endif %}>{% translate "Vacancies" %}</a>
+        <a href="{% url 'tracker:company_list' %}" class="pill"{% if section == "companies" %} aria-current="page"{% endif %}>{% translate "Companies" %}</a>
       </nav>
     {% endif %}
   </header>

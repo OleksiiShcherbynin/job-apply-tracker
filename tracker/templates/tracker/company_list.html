@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Companies · Job Apply Tracker{% endblock %}
+{% block title %}{% translate "Companies" %} · Job Apply Tracker{% endblock %}
 
 {% block content %}
-  <h1>Companies</h1>
-  <p><a href="{% url 'tracker:company_add' %}" role="button">Add company</a></p>
+  <h1>{% translate "Companies" %}</h1>
+  <p><a href="{% url 'tracker:company_add' %}" role="button">{% translate "Add company" %}</a></p>
 
   {% if company_list %}
     <table>
       <thead>
-        <tr><th>Name</th><th>Website</th><th></th></tr>
+        <tr><th>{% translate "Name" %}</th><th>{% translate "Website" %}</th><th></th></tr>
       </thead>
       <tbody>
         {% for company in company_list %}
@@ -17,14 +18,14 @@
             <td>{{ company.name }}</td>
             <td>{% if company.website %}<a href="{{ company.website }}">{{ company.website }}</a>{% endif %}</td>
             <td>
-              <a href="{% url 'tracker:company_edit' company.pk %}">Edit</a> ·
-              <a href="{% url 'tracker:company_delete' company.pk %}">Delete</a>
+              <a href="{% url 'tracker:company_edit' company.pk %}">{% translate "Edit" %}</a> ·
+              <a href="{% url 'tracker:company_delete' company.pk %}">{% translate "Delete" %}</a>
             </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% else %}
-    <p>No companies yet.</p>
+    <p>{% translate "No companies yet." %}</p>
   {% endif %}
 {% endblock %}

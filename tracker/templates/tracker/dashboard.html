@@ -1,15 +1,20 @@
 {% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Dashboard" %} · Job Apply Tracker{% endblock %}
 
 {% block content %}
-  <h1>Dashboard</h1>
+  <h1>{% translate "Dashboard" %}</h1>
 
   <section>
-    <h2>Needs attention</h2>
-    <p><small>Active applications with no news for {{ user.follow_up_days }}+ days — time to follow up or close them.</small></p>
+    <h2>{% translate "Needs attention" %}</h2>
+    <p><small>{% blocktranslate trimmed with days=user.follow_up_days %}
+      Active applications with no news for {{ days }}+ days — time to follow up or close them.
+    {% endblocktranslate %}</small></p>
     {% if needs_attention %}
       <table>
         <thead>
-          <tr><th>Vacancy</th><th>Company</th><th>Status</th><th>Last activity</th></tr>
+          <tr><th>{% translate "Vacancy" %}</th><th>{% translate "Company" %}</th><th>{% translate "Status" %}</th><th>{% translate "Last activity" %}</th></tr>
         </thead>
         <tbody>
           {% for application in needs_attention %}
@@ -17,29 +22,29 @@
               <td><a href="{{ application.get_absolute_url }}">{{ application.vacancy.title }}</a></td>
               <td>{{ application.vacancy.company }}</td>
               <td>{{ application.get_status_display }}</td>
-              <td>{% if application.last_activity %}{{ application.last_activity|timesince }} ago{% else %}applied {{ application.applied_at|timesince }} ago{% endif %}</td>
+              <td>{% if application.last_activity %}{% blocktranslate trimmed with since=application.last_activity|timesince %}{{ since }} ago{% endblocktranslate %}{% else %}{% blocktranslate trimmed with since=application.applied_at|timesince %}applied {{ since }} ago{% endblocktranslate %}{% endif %}</td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     {% else %}
-      <p>Nothing is waiting on you. 🎉</p>
+      <p>{% translate "Nothing is waiting on you." %} 🎉</p>
     {% endif %}
   </section>
 
   <div class="grid">
     <article>
-      <h2>Status</h2>
+      <h2>{% translate "Status" %}</h2>
       <ul>
         {% for label, count in status_counts %}
           <li>{{ label }}: <strong>{{ count }}</strong></li>
         {% endfor %}
       </ul>
-      <p><a href="{% url 'tracker:inbox' %}">Inbox: {{ inbox_count }} waiting</a></p>
+      <p><a href="{% url 'tracker:inbox' %}">{% blocktranslate trimmed with count=inbox_count %}Inbox: {{ count }} waiting{% endblocktranslate %}</a></p>
     </article>
 
     <article>
-      <h2>Recent events</h2>
+      <h2>{% translate "Recent events" %}</h2>
       <ul>
         {% for event in recent_events %}
           <li>
@@ -48,7 +53,7 @@
             {{ event.get_type_display }}{% if event.text %} — {{ event.text|truncatechars:60 }}{% endif %}
           </li>
         {% empty %}
-          <li>No events yet.</li>
+          <li>{% translate "No events yet." %}</li>
         {% endfor %}
       </ul>
     </article>
