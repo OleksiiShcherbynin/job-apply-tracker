@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n tracker_extras %}
 
 {% block title %}{% translate "Dashboard" %} · Job Apply Tracker{% endblock %}
 
@@ -50,7 +50,7 @@
           <li>
             <small>{{ event.happened_at|date:"Y-m-d" }}</small>
             <a href="{{ event.application.get_absolute_url }}">{{ event.application.vacancy.title }}</a>:
-            {{ event.get_type_display }}{% if event.text %} — {{ event.text|truncatechars:60 }}{% endif %}
+            {{ event.get_type_display }}{% if event.text %} — {{ event.text|system_text|truncatechars:60 }}{% endif %}
           </li>
         {% empty %}
           <li>{% translate "No events yet." %}</li>

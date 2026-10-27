@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 14:50+0100\n"
+"POT-Creation-Date: 2026-10-27 15:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,6 +64,14 @@ msgstr "Firmy"
 #: templates/registration/login.html:13
 msgid "Log in"
 msgstr "Prihlásiť sa"
+
+#: tracker/closing.py:19
+msgid "Posting closed on Profesia"
+msgstr "Ponuka bola uzavretá na Profesii"
+
+#: tracker/closing.py:20
+msgid "Closed on Profesia"
+msgstr "Uzavretá na Profesii"
 
 #: tracker/forms.py:22
 #, python-format
@@ -206,7 +214,7 @@ msgstr "Zamietnutá"
 msgid "Replied"
 msgstr "Odpovedali"
 
-#: tracker/models.py:191 tracker/models.py:253
+#: tracker/models.py:191 tracker/models.py:263
 msgid "Interview"
 msgstr "Pohovor"
 
@@ -226,19 +234,19 @@ msgstr "Bez odpovede"
 msgid "Withdrawn"
 msgstr "Stiahnutá"
 
-#: tracker/models.py:250
+#: tracker/models.py:260
 msgid "Status change"
 msgstr "Zmena stavu"
 
-#: tracker/models.py:251
+#: tracker/models.py:261
 msgid "Note"
 msgstr "Poznámka"
 
-#: tracker/models.py:252
+#: tracker/models.py:262
 msgid "Call"
 msgstr "Hovor"
 
-#: tracker/models.py:254
+#: tracker/models.py:264
 msgid "Email"
 msgstr "E-mail"
 
@@ -487,23 +495,23 @@ msgstr "Už ste sa uchádzali %(date)s — %(status)s"
 msgid "Dismissed before"
 msgstr "Už predtým zamietnutá"
 
-#: tracker/templates/tracker/inbox.html:54
+#: tracker/templates/tracker/inbox.html:55
 msgid "I applied"
 msgstr "Žiadosť odoslaná"
 
-#: tracker/templates/tracker/inbox.html:59
+#: tracker/templates/tracker/inbox.html:60
 msgid "Back to inbox"
 msgstr "Späť do doručených"
 
-#: tracker/templates/tracker/inbox.html:65
+#: tracker/templates/tracker/inbox.html:66
 msgid "Why not? (optional)"
 msgstr "Prečo nie? (nepovinné)"
 
-#: tracker/templates/tracker/inbox.html:66
+#: tracker/templates/tracker/inbox.html:67
 msgid "Dismiss"
 msgstr "Zamietnuť"
 
-#: tracker/templates/tracker/inbox.html:72
+#: tracker/templates/tracker/inbox.html:73
 msgid "Nothing to look at right now."
 msgstr "Momentálne tu nič nie je."
 

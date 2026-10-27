@@ -3,7 +3,7 @@ from datetime import date, datetime
 from django.conf import settings
 from django.db import models, transaction
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
 
 from .fingerprints import fingerprint
@@ -177,7 +177,7 @@ class Vacancy(TimeStampedModel):
                 happened_at=timezone.make_aware(
                     datetime.combine(applied_at, timezone.localtime().time())
                 ),
-                text=f"→ {Application.Status.APPLIED.label}",
+                text=Application.applied_event_text(),
             )
             self.state = self.State.APPLIED
             self.save(update_fields=["state", "updated_at"])
@@ -230,8 +230,18 @@ class Application(TimeStampedModel):
     def get_absolute_url(self):
         return reverse("tracker:application_detail", args=[self.pk])
 
+    # Timeline texts are stored in English whatever language the page is in;
+    # the system_text filter shows them in the reader's language.
+
+    @staticmethod
+    def applied_event_text():
+        with translation.override("en"):
+            return f"→ {Application.Status.APPLIED.label}"
+
     def change_status(self, new_status, comment="", when=None):
-        old_status_display = self.get_status_display()
+        with translation.override("en"):
+            old_label = self.get_status_display()
+            new_label = str(Application.Status(new_status).label)
         # Status and its timeline event change together or not at all.
         with transaction.atomic():
             self.status = new_status
@@ -240,7 +250,7 @@ class Application(TimeStampedModel):
                 application=self,
                 type=ApplicationEvent.EventType.STATUS_CHANGE,
                 happened_at=when or timezone.now(),
-                text=f"{old_status_display} → {self.get_status_display()}. {comment}".strip(),
+                text=f"{old_label} → {new_label}. {comment}".strip(),
             )
         return event
 

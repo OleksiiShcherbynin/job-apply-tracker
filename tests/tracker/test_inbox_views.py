@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import pytest
+from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from pytest_django.asserts import assertContains, assertNotContains
@@ -135,10 +136,12 @@ def test_card_shows_russian_reasons_and_rough_marker(client, user):
         score_reasons="English reason",
         score_reasons_ru="Русская причина",
     )
+    # Reasons follow the interface language (Stage 4); Russian needs the Russian UI.
+    client.cookies[settings.LANGUAGE_COOKIE_NAME] = "ru"
     response = client.get(reverse("tracker:inbox"))
     assertContains(response, "Русская причина")
     assertNotContains(response, "English reason")
-    assertContains(response, "rough")
+    assertContains(response, "черновая")  # the "rough" marker, translated
 
 
 def test_restore_returns_dismissed_to_inbox(client, user):

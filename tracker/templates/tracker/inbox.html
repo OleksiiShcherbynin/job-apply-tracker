@@ -34,13 +34,13 @@
         {% if vacancy.score is not None %}
           <mark>{% blocktranslate trimmed with score=vacancy.score %}score {{ score }}{% endblocktranslate %}{% if vacancy.score_stage == "rough" %} · {% translate "rough" %}{% endif %}</mark>
         {% endif %}
-        {% if vacancy.state == "dismissed" %}<small>· {% translate "dismissed" %}{% if vacancy.dismiss_reason %}: {{ vacancy.dismiss_reason }}{% endif %}</small>{% endif %}
+        {% if vacancy.state == "dismissed" %}<small>· {% translate "dismissed" %}{% if vacancy.dismiss_reason %}: {{ vacancy.dismiss_reason|system_text }}{% endif %}</small>{% endif %}
         {% if vacancy.has_newer_repost %}<small>· {% translate "newer repost in inbox" %}</small>{% endif %}
         {% if vacancy.closed_at %}<small>· {% blocktranslate trimmed with date=vacancy.closed_at|date:"Y-m-d" %}Closed on Profesia ({{ date }}){% endblocktranslate %}</small>{% endif %}
         {% if vacancy.prev_application_pk %}
           <br><small>⚠ <a href="{% url 'tracker:application_detail' vacancy.prev_application_pk %}">{% blocktranslate trimmed with date=vacancy.prev_applied_at|date:"Y-m-d" status=vacancy.prev_status|status_label %}Already applied on {{ date }} — {{ status }}{% endblocktranslate %}</a></small>
         {% elif vacancy.dismissed_before %}
-          <br><small>{% translate "Dismissed before" %}{% if vacancy.prev_dismiss_reason %}: {{ vacancy.prev_dismiss_reason }}{% endif %}</small>
+          <br><small>{% translate "Dismissed before" %}{% if vacancy.prev_dismiss_reason %}: {{ vacancy.prev_dismiss_reason|system_text }}{% endif %}</small>
         {% endif %}
       </header>
       <p>
@@ -48,8 +48,9 @@
         {% if vacancy.location %}{{ vacancy.location }} · {% endif %}
         {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener">{% translate "posting" %}</a>{% endif %}
       </p>
-      {% firstof vacancy.score_reasons_ru vacancy.score_reasons as reasons %}
-      {% if reasons %}<p><small>{{ reasons|linebreaksbr }}</small></p>{% endif %}
+      {% with reasons=vacancy|reasons %}
+        {% if reasons %}<p><small>{{ reasons|linebreaksbr }}</small></p>{% endif %}
+      {% endwith %}
       <footer>
         <a href="{% url 'tracker:vacancy_apply' vacancy.pk %}" role="button">{% translate "I applied" %}</a>
         {% if vacancy.state == "dismissed" %}
