@@ -1,0 +1,160 @@
+/* Soft warm theme on top of Pico.css (light only).
+   Palette from the Stage 4 spec; the main button and the muted text are a
+   shade darker than the mockup so that small text keeps WCAG AA contrast. */
+
+:root[data-theme="light"] {
+  --tracker-page: #faf7f2;
+  --tracker-card: #fffdfa;
+  --tracker-line: #ece5da;
+  --tracker-ink: #33302b;
+  --tracker-muted: #6f675d;
+  --tracker-pill: #f2ece3;
+  --tracker-pill-ink: #4a443c;
+  --tracker-current: #f5e3cf;
+  --tracker-current-ink: #8a5a2b;
+  --tracker-button: #9a6331;
+  --tracker-button-hover: #85542a;
+  --tracker-score: #eef3e6;
+  --tracker-score-ink: #4e6b2f;
+
+  --pico-background-color: var(--tracker-page);
+  --pico-color: var(--tracker-ink);
+  --pico-h1-color: var(--tracker-ink);
+  --pico-h2-color: var(--tracker-ink);
+  --pico-h3-color: var(--tracker-ink);
+  --pico-muted-color: var(--tracker-muted);
+  --pico-muted-border-color: var(--tracker-line);
+  --pico-border-radius: 10px;
+
+  --pico-primary: var(--tracker-current-ink);
+  --pico-primary-hover: var(--tracker-button-hover);
+  --pico-primary-background: var(--tracker-button);
+  --pico-primary-border: var(--tracker-button);
+  --pico-primary-hover-background: var(--tracker-button-hover);
+  --pico-primary-hover-border: var(--tracker-button-hover);
+  --pico-primary-focus: rgba(154, 99, 49, 0.25);
+  --pico-primary-inverse: #fff;
+
+  --pico-secondary: var(--tracker-pill-ink);
+  --pico-secondary-background: var(--tracker-pill);
+  --pico-secondary-border: var(--tracker-line);
+  --pico-secondary-hover-background: var(--tracker-current);
+  --pico-secondary-hover-border: var(--tracker-line);
+  --pico-secondary-inverse: var(--tracker-pill-ink);
+
+  --pico-card-background-color: var(--tracker-card);
+  --pico-card-sectioning-background-color: var(--tracker-card);
+  --pico-card-box-shadow: 0 1px 2px rgba(51, 48, 43, 0.05);
+
+  --pico-form-element-background-color: var(--tracker-card);
+  --pico-form-element-border-color: var(--tracker-line);
+
+  --pico-mark-background-color: var(--tracker-score);
+  --pico-mark-color: var(--tracker-score-ink);
+}
+
+/* ---- Header: name + language/user on row 1, sections on row 2 ---- */
+
+.site-header {
+  padding-top: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  margin-right: auto;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  /* Generous line height and no overflow clipping: the "y" keeps its tail. */
+  line-height: 1.3;
+  color: var(--tracker-ink);
+  text-decoration: none;
+}
+
+.brand:hover {
+  color: var(--tracker-ink);
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.top-actions form {
+  margin: 0;
+}
+
+.top-actions select,
+.top-actions button {
+  width: auto;
+  margin: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.top-actions select {
+  padding-right: 2rem;
+}
+
+.username {
+  color: var(--tracker-muted);
+  font-size: 0.85rem;
+}
+
+.sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.pill {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: var(--tracker-pill);
+  color: var(--tracker-pill-ink);
+  font-size: 0.92rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.pill:hover {
+  background: var(--tracker-current);
+  color: var(--tracker-current-ink);
+}
+
+.pill[aria-current="page"] {
+  background: var(--tracker-current);
+  color: var(--tracker-current-ink);
+  font-weight: 600;
+}
+
+/* ---- Content ---- */
+
+article {
+  border: 1px solid var(--tracker-line);
+  border-radius: 14px;
+}
+
+mark {
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
