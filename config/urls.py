@@ -7,5 +7,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("api/", include("api.urls")),
+    # set_language: the header's language switch posts here.
+    path("i18n/", include("django.conf.urls.i18n")),
     path("", include("tracker.urls")),
 ]

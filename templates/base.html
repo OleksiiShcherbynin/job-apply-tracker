@@ -1,38 +1,53 @@
-{% load static %}<!doctype html>
-<html lang="en">
+{% load static i18n tracker_extras %}{% get_current_language as LANGUAGE_CODE %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Job Apply Tracker{% endblock %}</title>
   <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
   <link rel="stylesheet" href="{% static 'css/pico.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
-  <header class="container">
-    <nav>
-      <ul><li><strong>Job Apply Tracker</strong></li></ul>
-      {% if user.is_authenticated %}
-        <ul>
-          <li><a href="{% url 'tracker:dashboard' %}">Dashboard</a></li>
-          <li><a href="{% url 'tracker:inbox' %}">Inbox</a></li>
-          <li><a href="{% url 'tracker:application_list' %}">Applications</a></li>
-          <li><a href="{% url 'tracker:vacancy_list' %}">Vacancies</a></li>
-          <li><a href="{% url 'tracker:company_list' %}">Companies</a></li>
-          <li>{{ user.username }}</li>
-          <li>
-            <form method="post" action="{% url 'logout' %}">
-              {% csrf_token %}
-              <button type="submit" class="secondary">Log out</button>
-            </form>
-          </li>
-        </ul>
-      {% endif %}
-    </nav>
+  <header class="container site-header">
+    <div class="topbar">
+      <a class="brand" href="{% url 'tracker:dashboard' %}">Job Apply Tracker</a>
+      <div class="top-actions">
+        <form class="language" method="post" action="{% url 'set_language' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% get_available_languages as languages %}
+          <select name="language" aria-label="{% translate "Language" %}" onchange="this.form.submit()">
+            {% for code, name in languages %}
+              <option value="{{ code }}"{% if code == LANGUAGE_CODE %} selected{% endif %}>{{ code|upper }}</option>
+            {% endfor %}
+          </select>
+          <noscript><button type="submit" class="secondary">{% translate "OK" %}</button></noscript>
+        </form>
+        {% if user.is_authenticated %}
+          <span class="username">{{ user.username }}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="secondary outline">{% translate "Log out" %}</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+      {% nav_section request as section %}
+      <nav class="sections" aria-label="{% translate "Sections" %}">
+        <a href="{% url 'tracker:dashboard' %}" class="pill"{% if section == "dashboard" %} aria-current="page"{% endif %}>{% translate "Dashboard" %}</a>
+        <a href="{% url 'tracker:inbox' %}" class="pill"{% if section == "inbox" %} aria-current="page"{% endif %}>{% translate "Inbox" %}</a>
+        <a href="{% url 'tracker:application_list' %}" class="pill"{% if section == "applications" %} aria-current="page"{% endif %}>{% translate "Applications" %}</a>
+        <a href="{% url 'tracker:vacancy_list' %}" class="pill"{% if section == "vacancies" %} aria-current="page"{% endif %}>{% translate "Vacancies" %}</a>
+        <a href="{% url 'tracker:company_list' %}" class="pill"{% if section == "companies" %} aria-current="page"{% endif %}>{% translate "Companies" %}</a>
+      </nav>
+    {% endif %}
   </header>
 
   <main class="container">
     {% for message in messages %}
-      <article>{{ message }}</article>
+      <article class="message">{{ message }}</article>
     {% endfor %}
     {% block content %}{% endblock %}
   </main>

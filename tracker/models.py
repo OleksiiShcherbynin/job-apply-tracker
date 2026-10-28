@@ -3,7 +3,8 @@ from datetime import date, datetime
 from django.conf import settings
 from django.db import models, transaction
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import gettext_lazy as _
 
 from .fingerprints import fingerprint
 from .managers import ApplicationQuerySet, VacancyQuerySet
@@ -62,17 +63,17 @@ class Company(TimeStampedModel):
 
 class Vacancy(TimeStampedModel):
     class Source(models.TextChoices):
-        MANUAL = "manual", "Manual"
+        MANUAL = "manual", _("Manual")
         JOB_AI_ASSIST = "job_ai_assist", "job-ai-assist"
 
     class ScoreStage(models.TextChoices):
-        ROUGH = "rough", "Rough"
-        FINAL = "final", "Final"
+        ROUGH = "rough", _("Rough")
+        FINAL = "final", _("Final")
 
     class State(models.TextChoices):
-        INBOX = "inbox", "Inbox"
-        APPLIED = "applied", "Applied"
-        DISMISSED = "dismissed", "Dismissed"
+        INBOX = "inbox", _("Inbox")
+        APPLIED = "applied", _("Applied")
+        DISMISSED = "dismissed", _("Dismissed")
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -176,7 +177,7 @@ class Vacancy(TimeStampedModel):
                 happened_at=timezone.make_aware(
                     datetime.combine(applied_at, timezone.localtime().time())
                 ),
-                text=f"→ {Application.Status.APPLIED.label}",
+                text=Application.applied_event_text(),
             )
             self.state = self.State.APPLIED
             self.save(update_fields=["state", "updated_at"])
@@ -185,13 +186,13 @@ class Vacancy(TimeStampedModel):
 
 class Application(TimeStampedModel):
     class Status(models.TextChoices):
-        APPLIED = "applied", "Applied"
-        REPLIED = "replied", "Replied"
-        INTERVIEW = "interview", "Interview"
-        OFFER = "offer", "Offer"
-        REJECTED = "rejected", "Rejected"
-        NO_RESPONSE = "no_response", "No response"
-        WITHDRAWN = "withdrawn", "Withdrawn"
+        APPLIED = "applied", _("Applied")
+        REPLIED = "replied", _("Replied")
+        INTERVIEW = "interview", _("Interview")
+        OFFER = "offer", _("Offer")
+        REJECTED = "rejected", _("Rejected")
+        NO_RESPONSE = "no_response", _("No response")
+        WITHDRAWN = "withdrawn", _("Withdrawn")
 
     # Statuses where the ball may be in the company's court: these feed
     # the needs-attention dashboard.
@@ -229,8 +230,18 @@ class Application(TimeStampedModel):
     def get_absolute_url(self):
         return reverse("tracker:application_detail", args=[self.pk])
 
+    # Timeline texts are stored in English whatever language the page is in;
+    # the system_text filter shows them in the reader's language.
+
+    @staticmethod
+    def applied_event_text():
+        with translation.override("en"):
+            return f"→ {Application.Status.APPLIED.label}"
+
     def change_status(self, new_status, comment="", when=None):
-        old_status_display = self.get_status_display()
+        with translation.override("en"):
+            old_label = self.get_status_display()
+            new_label = str(Application.Status(new_status).label)
         # Status and its timeline event change together or not at all.
         with transaction.atomic():
             self.status = new_status
@@ -239,18 +250,18 @@ class Application(TimeStampedModel):
                 application=self,
                 type=ApplicationEvent.EventType.STATUS_CHANGE,
                 happened_at=when or timezone.now(),
-                text=f"{old_status_display} → {self.get_status_display()}. {comment}".strip(),
+                text=f"{old_label} → {new_label}. {comment}".strip(),
             )
         return event
 
 
 class ApplicationEvent(TimeStampedModel):
     class EventType(models.TextChoices):
-        STATUS_CHANGE = "status_change", "Status change"
-        NOTE = "note", "Note"
-        CALL = "call", "Call"
-        INTERVIEW = "interview", "Interview"
-        EMAIL = "email", "Email"
+        STATUS_CHANGE = "status_change", _("Status change")
+        NOTE = "note", _("Note")
+        CALL = "call", _("Call")
+        INTERVIEW = "interview", _("Interview")
+        EMAIL = "email", _("Email")
 
     application = models.ForeignKey(
         Application,

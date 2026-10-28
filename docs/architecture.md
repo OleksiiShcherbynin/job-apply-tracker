@@ -1,7 +1,8 @@
 # Architecture
 
-How job-apply-tracker is actually built as of `v0.3.0` (Stage 0, MVP, Stage 2 Part A — the
-tracker side of the job-ai-assist push, Stage 3 Part A — the tracker side of auto-close).
+How job-apply-tracker is actually built as of `v1.0.0` (Stage 0, MVP, Stage 2 Part A — the
+tracker side of the job-ai-assist push, Stage 3 Part A — the tracker side of auto-close, Stage 4 —
+English/Slovak/Russian UI, the warm theme and the demo account).
 What it should become is in the [design spec](superpowers/specs/2026-10-14-job-apply-tracker-design.md);
 this document describes the code that exists. Russian translation: [architecture.ru.md](architecture.ru.md).
 
@@ -138,6 +139,31 @@ The applications list hides closed statuses (Rejected, No response, Withdrawn) u
 - `web` joins the fixed-name network `job-net` as `job-apply-tracker`; job-ai-assist declares the same
   network and posts to `http://job-apply-tracker:8000/api/v1/vacancies/`.
 
+## Languages and look (Stage 4)
+
+- UI in English (default), Slovak and Russian. `config.locale.CookieLocaleMiddleware` activates the
+  language from the cookie written by Django's `set_language` (the header dropdown) and ignores the
+  browser's `Accept-Language`, so every visitor starts in English.
+- Strings are marked with `{% translate %}` / `gettext_lazy`; catalogs live in `locale/` and are
+  committed as `.po` **and** compiled `.mo`, because the dev machine has no GNU gettext.
+  `docker/i18n.sh` regenerates and compiles them in a throwaway `python:3.12-slim` container; the
+  project's `makemessages` turns off fuzzy matching. `tests/test_translations.py` fails when a string
+  is untranslated or the `.mo` is stale.
+- Texts the code stores (`"Applied → Rejected. <comment>"`, `"→ Applied"`, "Posting closed on
+  Profesia", "Closed on Profesia") are always written in English and translated at display time by
+  the `system_text` filter; anything a person typed is shown as stored. Score reasons follow the
+  language (`reasons` filter: Russian UI → Russian reasons first).
+- The look is `static/css/theme.css` over Pico.css: light only, warm sand palette, two-row header
+  (name + language/user/log out, then the five sections as pills with the current one highlighted).
+
+## Demo account (Stage 4)
+
+`python manage.py seed_demo` (re)creates the user `demo` / `tracker-demo` with invented Bratislava
+companies, scored vacancies, applications in every status and one posting closed on Profesia; dates
+are relative to the day it runs. It only ever touches the demo user's rows and refuses to run when a
+`demo` account is staff, a superuser or has an API token. In the live container:
+`docker compose exec web python manage.py seed_demo`.
+
 ## Query budget
 
 Every list and the dashboard have a fixed number of queries regardless of data size, pinned by
@@ -196,8 +222,9 @@ One entry per decision: context → decision → consequence.
     `tracker/templates/tracker/`. Logout is POST-only and redirects to login.
 15. **Environment pins.** `psycopg[binary]==3.2.9` (newer Windows wheels are blocked by Smart App Control
     on the dev machine); compose Postgres on host port **5433** (5432 is taken by a local PostgreSQL).
-16. **Deferred to later stages:** security headers / HTTPS (Stage 4), pagination (not needed at one
-    user's volume), UI for editing notes or deleting events/attachments (admin covers it), cleaning up
+16. **Deferred, then settled:** security headers / HTTPS live in `prod.py` behind `DJANGO_HTTPS`;
+    Stage 4 dropped the public deployment (no hosting budget), so they stay unused on the laptop.
+    Still deferred: pagination (not needed at one user's volume), UI for editing notes or deleting events/attachments (admin covers it), cleaning up
     files of deleted attachments.
 17. **Ingest rules in the domain, HTTP in `api/`.** The same rules could serve a CSV import or a
     management command later. → `tracker/ingest.py` is plain Python; the view only validates and loops.
@@ -229,3 +256,19 @@ One entry per decision: context → decision → consequence.
     refresh its Profesia fields instead of adopting it.
 28. **`closed_at` is a fact, not a state.** "Back to inbox" keeps it, so a restored closed vacancy is
     not offered for checking again and the closure is never reported twice.
+29. **Language from the switch only.** `LocaleMiddleware` would follow `Accept-Language`, so an
+    interviewer with a Slovak browser and every screenshot would land on a random language. → A small
+    cookie-only middleware; garbage or unsupported cookies fall back to English.
+30. **System texts translated at display time, not stored per language.** The timeline already holds
+    English texts on live data. Storing structured events ("from X to Y") was rejected: it needs a
+    migration of the author's live rows for little gain. → The code keeps writing English
+    (`translation.override("en")`), `system_text` recognises only the exact shapes the code writes.
+31. **Compiled catalogs in the repo.** No gettext on the dev machine and no new dependency. → `.po` +
+    `.mo` committed, regenerated in a container, guarded by a test that compares them; no plural forms
+    (counts read "Files: 3"), gender-neutral wording ("Отклик отправлен").
+32. **Demo data in the live database, behind a guard.** The author shows the tracker from his laptop
+    without exposing real applications: log out, log in as `demo`. Owner isolation keeps the rows
+    apart; the guard keeps a real "demo" account from being taken over.
+33. **No public deployment.** Free hosting was declined; the README with screenshots is the showcase
+    and `docker compose up` + `seed_demo` runs it locally. Theme colours are a shade darker than the
+    mockup where needed for WCAG AA contrast.

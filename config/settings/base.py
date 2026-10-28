@@ -26,6 +26,8 @@ MIDDLEWARE = [
     # Serves collected static files from gunicorn; no separate web server needed.
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Language from the switch's cookie only; the browser's preference is ignored.
+    "config.locale.CookieLocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -64,6 +66,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "en"
+LANGUAGES = [("en", "English"), ("sk", "Slovenčina"), ("ru", "Русский")]
+# Django's default is a session cookie: the choice would be lost with the browser.
+LANGUAGE_COOKIE_AGE = 60 * 60 * 24 * 365
+# Catalogs are committed (.po and compiled .mo): the dev machine has no GNU
+# gettext, docker/i18n.sh regenerates them in a throwaway container.
+LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Europe/Bratislava"
 USE_I18N = True
 USE_TZ = True

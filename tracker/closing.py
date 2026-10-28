@@ -10,11 +10,14 @@ job-ai-assist reports closures; the rules live here:
 """
 
 from django.db import transaction
+from django.utils.translation import gettext_noop
 
 from .models import Application, ApplicationEvent, Vacancy
 
-CLOSED_EVENT_TEXT = "Posting closed on Profesia"
-CLOSED_DISMISS_REASON = "Closed on Profesia"
+# Stored in English (gettext_noop only marks them for the catalogs); the pages
+# translate them at display time, see tracker_extras.system_text.
+CLOSED_EVENT_TEXT = gettext_noop("Posting closed on Profesia")
+CLOSED_DISMISS_REASON = gettext_noop("Closed on Profesia")
 
 
 def report_closed(owner, external_id: str, seen_at) -> str:

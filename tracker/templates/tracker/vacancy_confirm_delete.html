@@ -1,19 +1,23 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
   <article>
-    <h1>Delete {{ object }}?</h1>
+    <h1>{% blocktranslate trimmed with vacancy=object %}Delete {{ vacancy }}?{% endblocktranslate %}</h1>
     {% if application %}
-      <p><mark>This vacancy has an application</mark> ({{ application.get_status_display }},
-         applied {{ application.applied_at|date:"Y-m-d" }}) with {{ event_count }} timeline
-         event{{ event_count|pluralize }} and {{ attachment_count }} file{{ attachment_count|pluralize }}.
-         Deleting the vacancy deletes all of it. This cannot be undone.</p>
+      {# Counts as "label: number": no plural forms to get wrong in Slovak and Russian. #}
+      <p><mark>{% translate "This vacancy has an application" %}</mark>
+         ({{ application.get_status_display }}, {% blocktranslate trimmed with date=application.applied_at|date:"Y-m-d" %}applied {{ date }}{% endblocktranslate %}).
+         {% blocktranslate trimmed with events=event_count files=attachment_count %}
+           Timeline events: {{ events }}, files: {{ files }}.
+           Deleting the vacancy deletes all of it. This cannot be undone.
+         {% endblocktranslate %}</p>
     {% endif %}
     <form method="post">
       {% csrf_token %}
       {% include "tracker/_form_fields.html" %}
-      <button type="submit" class="secondary">Yes, delete</button>
-      <a href="{% url 'tracker:vacancy_list' %}">Cancel</a>
+      <button type="submit" class="secondary">{% translate "Yes, delete" %}</button>
+      <a href="{% url 'tracker:vacancy_list' %}">{% translate "Cancel" %}</a>
     </form>
   </article>
 {% endblock %}

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
   <article>
-    <h1>I applied: {{ vacancy.title }}</h1>
+    <h1>{% blocktranslate trimmed with title=vacancy.title %}I applied: {{ title }}{% endblocktranslate %}</h1>
     <p>{{ vacancy.company }}</p>
     {% if previous_attempts %}
-      <p><mark>You already applied to this posting:</mark></p>
+      <p><mark>{% translate "You already applied to this posting:" %}</mark></p>
       <ul>
         {% for attempt in previous_attempts %}
           <li><a href="{{ attempt.get_absolute_url }}">{{ attempt.applied_at|date:"Y-m-d" }} — {{ attempt.get_status_display }}</a></li>
@@ -16,8 +17,8 @@
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       {% include "tracker/_form_fields.html" %}
-      <button type="submit">Save application</button>
-      <a href="{% url 'tracker:inbox' %}">Cancel</a>
+      <button type="submit">{% translate "Save application" %}</button>
+      <a href="{% url 'tracker:inbox' %}">{% translate "Cancel" %}</a>
     </form>
   </article>
 {% endblock %}

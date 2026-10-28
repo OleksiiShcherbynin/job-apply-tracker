@@ -1,0 +1,592 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-27 15:01+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n "
+">= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+
+#: templates/base.html:20
+msgid "Language"
+msgstr "Jazyk"
+
+#: templates/base.html:25
+msgid "OK"
+msgstr "OK"
+
+#: templates/base.html:31
+msgid "Log out"
+msgstr "Odhlásiť sa"
+
+#: templates/base.html:38
+msgid "Sections"
+msgstr "Sekcie"
+
+#: templates/base.html:39 tracker/templates/tracker/dashboard.html:4
+#: tracker/templates/tracker/dashboard.html:7
+msgid "Dashboard"
+msgstr "Prehľad"
+
+#: templates/base.html:40 tracker/models.py:74
+#: tracker/templates/tracker/inbox.html:4
+#: tracker/templates/tracker/inbox.html:7
+msgid "Inbox"
+msgstr "Doručené"
+
+#: templates/base.html:41 tracker/templates/tracker/application_list.html:4
+#: tracker/templates/tracker/application_list.html:7
+msgid "Applications"
+msgstr "Žiadosti"
+
+#: templates/base.html:42 tracker/templates/tracker/vacancy_list.html:4
+#: tracker/templates/tracker/vacancy_list.html:7
+msgid "Vacancies"
+msgstr "Ponuky"
+
+#: templates/base.html:43 tracker/templates/tracker/company_list.html:4
+#: tracker/templates/tracker/company_list.html:7
+msgid "Companies"
+msgstr "Firmy"
+
+#: templates/registration/login.html:4 templates/registration/login.html:8
+#: templates/registration/login.html:13
+msgid "Log in"
+msgstr "Prihlásiť sa"
+
+#: tracker/closing.py:19
+msgid "Posting closed on Profesia"
+msgstr "Ponuka bola uzavretá na Profesii"
+
+#: tracker/closing.py:20
+msgid "Closed on Profesia"
+msgstr "Uzavretá na Profesii"
+
+#: tracker/forms.py:22
+#, python-format
+msgid "File type %(extension)s not allowed. Use: %(allowed)s."
+msgstr "Typ súboru %(extension)s nie je povolený. Povolené: %(allowed)s."
+
+#: tracker/forms.py:23
+msgid "(none)"
+msgstr "(žiadny)"
+
+#: tracker/forms.py:26
+msgid "File is larger than 5 MB."
+msgstr "Súbor je väčší ako 5 MB."
+
+#: tracker/forms.py:47 tracker/forms.py:101
+msgid "File"
+msgstr "Súbor"
+
+#: tracker/forms.py:47 tracker/forms.py:104
+msgid "Label"
+msgstr "Označenie"
+
+#: tracker/forms.py:59 tracker/templates/tracker/company_list.html:13
+msgid "Name"
+msgstr "Názov"
+
+#: tracker/forms.py:59 tracker/templates/tracker/company_list.html:13
+msgid "Website"
+msgstr "Web"
+
+#: tracker/forms.py:59 tracker/forms.py:98
+msgid "Notes"
+msgstr "Poznámky"
+
+#: tracker/forms.py:66
+msgid "You already have a company with this name."
+msgstr "Firmu s týmto názvom už máte."
+
+#: tracker/forms.py:76 tracker/templates/tracker/application_list.html:30
+#: tracker/templates/tracker/dashboard.html:17
+#: tracker/templates/tracker/vacancy_list.html:19
+msgid "Company"
+msgstr "Firma"
+
+#: tracker/forms.py:77 tracker/templates/tracker/vacancy_list.html:19
+msgid "Title"
+msgstr "Pozícia"
+
+#: tracker/forms.py:78
+msgid "Link to the posting"
+msgstr "Odkaz na ponuku"
+
+#: tracker/forms.py:79
+msgid "Salary"
+msgstr "Plat"
+
+#: tracker/forms.py:80
+msgid "Location"
+msgstr "Miesto"
+
+#: tracker/forms.py:92 tracker/templates/tracker/application_list.html:30
+msgid "Applied on"
+msgstr "Dátum žiadosti"
+
+#: tracker/forms.py:95
+msgid "When you actually sent it — may be in the past."
+msgstr "Kedy ste žiadosť naozaj poslali — môže to byť aj v minulosti."
+
+#: tracker/forms.py:101
+msgid "CV or cover letter you sent (optional)."
+msgstr "Životopis alebo motivačný list, ktorý ste poslali (nepovinné)."
+
+#: tracker/forms.py:104
+msgid "e.g. \"CV v3 EN\""
+msgstr "napr. „CV v3 EN“"
+
+#: tracker/forms.py:112
+msgid "Yes, apply again"
+msgstr "Áno, uchádzať sa znova"
+
+#: tracker/forms.py:136
+msgid "Why not?"
+msgstr "Prečo nie?"
+
+#: tracker/forms.py:143
+msgid "Type"
+msgstr "Typ"
+
+#: tracker/forms.py:143
+msgid "When"
+msgstr "Kedy"
+
+#: tracker/forms.py:143
+msgid "Text"
+msgstr "Text"
+
+#: tracker/forms.py:163 tracker/templates/tracker/application_list.html:30
+#: tracker/templates/tracker/dashboard.html:17
+#: tracker/templates/tracker/dashboard.html:37
+msgid "Status"
+msgstr "Stav"
+
+#: tracker/forms.py:164
+msgid "Comment"
+msgstr "Komentár"
+
+#: tracker/forms.py:177
+msgid ""
+"The application already has this status. To record news without changing it, "
+"add an event."
+msgstr ""
+"Žiadosť už má tento stav. Ak chcete zaznamenať novinku bez zmeny stavu, "
+"pridajte udalosť."
+
+#: tracker/forms.py:193
+msgid "Also delete its application with the whole timeline and files"
+msgstr "Vymazať aj jej žiadosť s celou históriou a súbormi"
+
+#: tracker/models.py:66
+msgid "Manual"
+msgstr "Ručne"
+
+#: tracker/models.py:70
+msgid "Rough"
+msgstr "Predbežné"
+
+#: tracker/models.py:71
+msgid "Final"
+msgstr "Konečné"
+
+#: tracker/models.py:75 tracker/models.py:189
+msgid "Applied"
+msgstr "Odoslaná"
+
+#: tracker/models.py:76
+msgid "Dismissed"
+msgstr "Zamietnutá"
+
+#: tracker/models.py:190
+msgid "Replied"
+msgstr "Odpovedali"
+
+#: tracker/models.py:191 tracker/models.py:263
+msgid "Interview"
+msgstr "Pohovor"
+
+#: tracker/models.py:192
+msgid "Offer"
+msgstr "Ponuka práce"
+
+#: tracker/models.py:193
+msgid "Rejected"
+msgstr "Odmietnutá"
+
+#: tracker/models.py:194
+msgid "No response"
+msgstr "Bez odpovede"
+
+#: tracker/models.py:195
+msgid "Withdrawn"
+msgstr "Stiahnutá"
+
+#: tracker/models.py:260
+msgid "Status change"
+msgstr "Zmena stavu"
+
+#: tracker/models.py:261
+msgid "Note"
+msgstr "Poznámka"
+
+#: tracker/models.py:262
+msgid "Call"
+msgstr "Hovor"
+
+#: tracker/models.py:264
+msgid "Email"
+msgstr "E-mail"
+
+#: tracker/templates/tracker/application_detail.html:11
+#: tracker/templates/tracker/vacancy_confirm_delete.html:10
+#, python-format
+msgid "applied %(date)s"
+msgstr "odoslaná %(date)s"
+
+#: tracker/templates/tracker/application_detail.html:12
+#: tracker/templates/tracker/inbox.html:49
+msgid "posting"
+msgstr "ponuka"
+
+#: tracker/templates/tracker/application_detail.html:13
+#: tracker/templates/tracker/inbox.html:39
+#, python-format
+msgid "Closed on Profesia (%(date)s)"
+msgstr "Uzavretá na Profesii (%(date)s)"
+
+#: tracker/templates/tracker/application_detail.html:17
+msgid "Previous attempt:"
+msgstr "Predchádzajúci pokus:"
+
+#: tracker/templates/tracker/application_detail.html:20
+msgid "Later attempt:"
+msgstr "Neskorší pokus:"
+
+#: tracker/templates/tracker/application_detail.html:26
+msgid "Change status"
+msgstr "Zmeniť stav"
+
+#: tracker/templates/tracker/application_detail.html:30
+msgid "Update status"
+msgstr "Uložiť stav"
+
+#: tracker/templates/tracker/application_detail.html:35
+msgid "Add event"
+msgstr "Pridať udalosť"
+
+#: tracker/templates/tracker/application_detail.html:39
+msgid "Add to timeline"
+msgstr "Pridať do histórie"
+
+#: tracker/templates/tracker/application_detail.html:44
+msgid "Timeline"
+msgstr "História"
+
+#: tracker/templates/tracker/application_detail.html:52
+msgid "Nothing yet."
+msgstr "Zatiaľ nič."
+
+#: tracker/templates/tracker/application_detail.html:56
+msgid "Attachments"
+msgstr "Prílohy"
+
+#: tracker/templates/tracker/application_detail.html:61
+msgid "None."
+msgstr "Žiadne."
+
+#: tracker/templates/tracker/application_detail.html:67
+msgid "Upload"
+msgstr "Nahrať"
+
+#: tracker/templates/tracker/application_list.html:13
+msgid "Title or company"
+msgstr "Pozícia alebo firma"
+
+#: tracker/templates/tracker/application_list.html:15
+msgid "Any status"
+msgstr "Akýkoľvek stav"
+
+#: tracker/templates/tracker/application_list.html:20
+msgid "Search"
+msgstr "Hľadať"
+
+#: tracker/templates/tracker/application_list.html:24
+msgid "Show archive (rejected, no response, withdrawn)"
+msgstr "Zobraziť archív (odmietnuté, bez odpovede, stiahnuté)"
+
+#: tracker/templates/tracker/application_list.html:30
+#: tracker/templates/tracker/dashboard.html:17
+msgid "Vacancy"
+msgstr "Ponuka"
+
+#: tracker/templates/tracker/application_list.html:41
+msgid "No applications found."
+msgstr "Žiadne žiadosti."
+
+#: tracker/templates/tracker/apply_form.html:6
+#, python-format
+msgid "I applied: %(title)s"
+msgstr "Žiadosť odoslaná: %(title)s"
+
+#: tracker/templates/tracker/apply_form.html:9
+msgid "You already applied to this posting:"
+msgstr "Na túto ponuku ste sa už uchádzali:"
+
+#: tracker/templates/tracker/apply_form.html:20
+msgid "Save application"
+msgstr "Uložiť žiadosť"
+
+#: tracker/templates/tracker/apply_form.html:21
+#: tracker/templates/tracker/company_confirm_delete.html:10
+#: tracker/templates/tracker/company_form.html:11
+#: tracker/templates/tracker/vacancy_confirm_delete.html:20
+#: tracker/templates/tracker/vacancy_form.html:11
+msgid "Cancel"
+msgstr "Zrušiť"
+
+#: tracker/templates/tracker/company_confirm_delete.html:6
+#, python-format
+msgid "Delete %(name)s?"
+msgstr "Vymazať %(name)s?"
+
+#: tracker/templates/tracker/company_confirm_delete.html:9
+#: tracker/templates/tracker/vacancy_confirm_delete.html:19
+msgid "Yes, delete"
+msgstr "Áno, vymazať"
+
+#: tracker/templates/tracker/company_form.html:6
+#, python-format
+msgid "Edit %(name)s"
+msgstr "Upraviť: %(name)s"
+
+#: tracker/templates/tracker/company_form.html:6
+msgid "New company"
+msgstr "Nová firma"
+
+#: tracker/templates/tracker/company_form.html:10
+#: tracker/templates/tracker/vacancy_form.html:10
+msgid "Save"
+msgstr "Uložiť"
+
+#: tracker/templates/tracker/company_list.html:8
+msgid "Add company"
+msgstr "Pridať firmu"
+
+#: tracker/templates/tracker/company_list.html:21
+#: tracker/templates/tracker/vacancy_list.html:29
+msgid "Edit"
+msgstr "Upraviť"
+
+#: tracker/templates/tracker/company_list.html:22
+#: tracker/templates/tracker/vacancy_list.html:30
+msgid "Delete"
+msgstr "Vymazať"
+
+#: tracker/templates/tracker/company_list.html:29
+msgid "No companies yet."
+msgstr "Zatiaľ žiadne firmy."
+
+#: tracker/templates/tracker/dashboard.html:10
+msgid "Needs attention"
+msgstr "Vyžaduje pozornosť"
+
+#: tracker/templates/tracker/dashboard.html:11
+#, python-format
+msgid ""
+"Active applications with no news for %(days)s+ days — time to follow up or "
+"close them."
+msgstr ""
+"Aktívne žiadosti bez správ %(days)s+ dní — čas pripomenúť sa alebo ich "
+"uzavrieť."
+
+#: tracker/templates/tracker/dashboard.html:17
+msgid "Last activity"
+msgstr "Posledná aktivita"
+
+#: tracker/templates/tracker/dashboard.html:25
+#, python-format
+msgid "%(since)s ago"
+msgstr "%(since)s dozadu"
+
+#: tracker/templates/tracker/dashboard.html:25
+#, python-format
+msgid "applied %(since)s ago"
+msgstr "odoslaná %(since)s dozadu"
+
+#: tracker/templates/tracker/dashboard.html:31
+msgid "Nothing is waiting on you."
+msgstr "Nič na vás nečaká."
+
+#: tracker/templates/tracker/dashboard.html:43
+#, python-format
+msgid "Inbox: %(count)s waiting"
+msgstr "V doručených čaká: %(count)s"
+
+#: tracker/templates/tracker/dashboard.html:47
+msgid "Recent events"
+msgstr "Posledné udalosti"
+
+#: tracker/templates/tracker/dashboard.html:56
+msgid "No events yet."
+msgstr "Zatiaľ žiadne udalosti."
+
+#: tracker/templates/tracker/inbox.html:8
+#, python-format
+msgid ""
+"Fresh vacancies scored %(score)s+ (and ones you added by hand), best first."
+msgstr ""
+"Čerstvé ponuky so skóre %(score)s+ (a tie, ktoré ste pridali ručne), "
+"najlepšie navrchu."
+
+#: tracker/templates/tracker/inbox.html:11
+msgid "Add one by hand"
+msgstr "Pridať ručne"
+
+#: tracker/templates/tracker/inbox.html:18
+#, python-format
+msgid "Unprocessed (older than %(days)s days, or dismissed)"
+msgstr "Nespracované (staršie ako %(days)s dní alebo zamietnuté)"
+
+#: tracker/templates/tracker/inbox.html:24
+#, python-format
+msgid "Score below %(score)s"
+msgstr "Skóre pod %(score)s"
+
+#: tracker/templates/tracker/inbox.html:27
+msgid "Show"
+msgstr "Zobraziť"
+
+#: tracker/templates/tracker/inbox.html:35
+#, python-format
+msgid "score %(score)s"
+msgstr "skóre %(score)s"
+
+#: tracker/templates/tracker/inbox.html:35
+msgid "rough"
+msgstr "predbežné"
+
+#: tracker/templates/tracker/inbox.html:37
+msgid "dismissed"
+msgstr "zamietnutá"
+
+#: tracker/templates/tracker/inbox.html:38
+msgid "newer repost in inbox"
+msgstr "v doručených je novšie zverejnenie"
+
+#: tracker/templates/tracker/inbox.html:41
+#, python-format
+msgid "Already applied on %(date)s — %(status)s"
+msgstr "Už ste sa uchádzali %(date)s — %(status)s"
+
+#: tracker/templates/tracker/inbox.html:43
+msgid "Dismissed before"
+msgstr "Už predtým zamietnutá"
+
+#: tracker/templates/tracker/inbox.html:55
+msgid "I applied"
+msgstr "Žiadosť odoslaná"
+
+#: tracker/templates/tracker/inbox.html:60
+msgid "Back to inbox"
+msgstr "Späť do doručených"
+
+#: tracker/templates/tracker/inbox.html:66
+msgid "Why not? (optional)"
+msgstr "Prečo nie? (nepovinné)"
+
+#: tracker/templates/tracker/inbox.html:67
+msgid "Dismiss"
+msgstr "Zamietnuť"
+
+#: tracker/templates/tracker/inbox.html:73
+msgid "Nothing to look at right now."
+msgstr "Momentálne tu nič nie je."
+
+#: tracker/templates/tracker/vacancy_confirm_delete.html:6
+#, python-format
+msgid "Delete %(vacancy)s?"
+msgstr "Vymazať %(vacancy)s?"
+
+#: tracker/templates/tracker/vacancy_confirm_delete.html:9
+msgid "This vacancy has an application"
+msgstr "Táto ponuka má žiadosť"
+
+#: tracker/templates/tracker/vacancy_confirm_delete.html:11
+#, python-format
+msgid ""
+"Timeline events: %(events)s, files: %(files)s. Deleting the vacancy deletes "
+"all of it. This cannot be undone."
+msgstr ""
+"Udalosti v histórii: %(events)s, súbory: %(files)s. Vymazaním ponuky sa "
+"vymaže všetko. Nedá sa to vrátiť."
+
+#: tracker/templates/tracker/vacancy_form.html:6
+#, python-format
+msgid "Edit %(title)s"
+msgstr "Upraviť: %(title)s"
+
+#: tracker/templates/tracker/vacancy_form.html:6
+msgid "New vacancy"
+msgstr "Nová ponuka"
+
+#: tracker/templates/tracker/vacancy_list.html:9
+msgid "Show:"
+msgstr "Zobraziť:"
+
+#: tracker/templates/tracker/vacancy_list.html:10
+msgid "all"
+msgstr "všetky"
+
+#: tracker/templates/tracker/vacancy_list.html:14
+msgid "add vacancy"
+msgstr "pridať ponuku"
+
+#: tracker/templates/tracker/vacancy_list.html:19
+msgid "State"
+msgstr "Stav"
+
+#: tracker/templates/tracker/vacancy_list.html:19
+msgid "Score"
+msgstr "Skóre"
+
+#: tracker/templates/tracker/vacancy_list.html:34
+msgid "Nothing here."
+msgstr "Nič tu nie je."
+
+#: tracker/views.py:95
+#, python-format
+msgid "%(company)s has vacancies — delete or move them first."
+msgstr "Firma %(company)s má ponuky — najprv ich vymažte alebo presuňte."
+
+#: tracker/views.py:205
+#, python-format
+msgid "Deleted: %(vacancy)s."
+msgstr "Vymazané: %(vacancy)s."
+
+#: tracker/views.py:257
+#, python-format
+msgid "Applied: %(vacancy)s."
+msgstr "Žiadosť uložená: %(vacancy)s."
+
+#: tracker/views.py:278
+#, python-format
+msgid "Dismissed: %(vacancy)s."
+msgstr "Zamietnuté: %(vacancy)s."
+
+#: tracker/views.py:296
+#, python-format
+msgid "Back in the inbox: %(vacancy)s."
+msgstr "Znova v doručených: %(vacancy)s."

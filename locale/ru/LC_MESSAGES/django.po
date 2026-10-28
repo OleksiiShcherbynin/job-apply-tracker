@@ -1,0 +1,594 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-27 15:01+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: templates/base.html:20
+msgid "Language"
+msgstr "Язык"
+
+#: templates/base.html:25
+msgid "OK"
+msgstr "OK"
+
+#: templates/base.html:31
+msgid "Log out"
+msgstr "Выйти"
+
+#: templates/base.html:38
+msgid "Sections"
+msgstr "Разделы"
+
+#: templates/base.html:39 tracker/templates/tracker/dashboard.html:4
+#: tracker/templates/tracker/dashboard.html:7
+msgid "Dashboard"
+msgstr "Обзор"
+
+#: templates/base.html:40 tracker/models.py:74
+#: tracker/templates/tracker/inbox.html:4
+#: tracker/templates/tracker/inbox.html:7
+msgid "Inbox"
+msgstr "Входящие"
+
+#: templates/base.html:41 tracker/templates/tracker/application_list.html:4
+#: tracker/templates/tracker/application_list.html:7
+msgid "Applications"
+msgstr "Заявки"
+
+#: templates/base.html:42 tracker/templates/tracker/vacancy_list.html:4
+#: tracker/templates/tracker/vacancy_list.html:7
+msgid "Vacancies"
+msgstr "Вакансии"
+
+#: templates/base.html:43 tracker/templates/tracker/company_list.html:4
+#: tracker/templates/tracker/company_list.html:7
+msgid "Companies"
+msgstr "Компании"
+
+#: templates/registration/login.html:4 templates/registration/login.html:8
+#: templates/registration/login.html:13
+msgid "Log in"
+msgstr "Войти"
+
+#: tracker/closing.py:19
+msgid "Posting closed on Profesia"
+msgstr "Объявление закрыто на Profesia"
+
+#: tracker/closing.py:20
+msgid "Closed on Profesia"
+msgstr "Закрыто на Profesia"
+
+#: tracker/forms.py:22
+#, python-format
+msgid "File type %(extension)s not allowed. Use: %(allowed)s."
+msgstr "Тип файла %(extension)s не разрешён. Можно: %(allowed)s."
+
+#: tracker/forms.py:23
+msgid "(none)"
+msgstr "(нет)"
+
+#: tracker/forms.py:26
+msgid "File is larger than 5 MB."
+msgstr "Файл больше 5 МБ."
+
+#: tracker/forms.py:47 tracker/forms.py:101
+msgid "File"
+msgstr "Файл"
+
+#: tracker/forms.py:47 tracker/forms.py:104
+msgid "Label"
+msgstr "Подпись"
+
+#: tracker/forms.py:59 tracker/templates/tracker/company_list.html:13
+msgid "Name"
+msgstr "Название"
+
+#: tracker/forms.py:59 tracker/templates/tracker/company_list.html:13
+msgid "Website"
+msgstr "Сайт"
+
+#: tracker/forms.py:59 tracker/forms.py:98
+msgid "Notes"
+msgstr "Заметки"
+
+#: tracker/forms.py:66
+msgid "You already have a company with this name."
+msgstr "У вас уже есть компания с таким названием."
+
+#: tracker/forms.py:76 tracker/templates/tracker/application_list.html:30
+#: tracker/templates/tracker/dashboard.html:17
+#: tracker/templates/tracker/vacancy_list.html:19
+msgid "Company"
+msgstr "Компания"
+
+#: tracker/forms.py:77 tracker/templates/tracker/vacancy_list.html:19
+msgid "Title"
+msgstr "Должность"
+
+#: tracker/forms.py:78
+msgid "Link to the posting"
+msgstr "Ссылка на объявление"
+
+#: tracker/forms.py:79
+msgid "Salary"
+msgstr "Зарплата"
+
+#: tracker/forms.py:80
+msgid "Location"
+msgstr "Место"
+
+#: tracker/forms.py:92 tracker/templates/tracker/application_list.html:30
+msgid "Applied on"
+msgstr "Дата отклика"
+
+#: tracker/forms.py:95
+msgid "When you actually sent it — may be in the past."
+msgstr "Когда вы на самом деле отправили отклик — можно указать прошлую дату."
+
+#: tracker/forms.py:101
+msgid "CV or cover letter you sent (optional)."
+msgstr ""
+"Резюме или сопроводительное письмо, которое вы отправили (необязательно)."
+
+#: tracker/forms.py:104
+msgid "e.g. \"CV v3 EN\""
+msgstr "например, «CV v3 EN»"
+
+#: tracker/forms.py:112
+msgid "Yes, apply again"
+msgstr "Да, откликнуться снова"
+
+#: tracker/forms.py:136
+msgid "Why not?"
+msgstr "Почему нет?"
+
+#: tracker/forms.py:143
+msgid "Type"
+msgstr "Тип"
+
+#: tracker/forms.py:143
+msgid "When"
+msgstr "Когда"
+
+#: tracker/forms.py:143
+msgid "Text"
+msgstr "Текст"
+
+#: tracker/forms.py:163 tracker/templates/tracker/application_list.html:30
+#: tracker/templates/tracker/dashboard.html:17
+#: tracker/templates/tracker/dashboard.html:37
+msgid "Status"
+msgstr "Статус"
+
+#: tracker/forms.py:164
+msgid "Comment"
+msgstr "Комментарий"
+
+#: tracker/forms.py:177
+msgid ""
+"The application already has this status. To record news without changing it, "
+"add an event."
+msgstr ""
+"У заявки уже этот статус. Чтобы записать новость без смены статуса, добавьте "
+"событие."
+
+#: tracker/forms.py:193
+msgid "Also delete its application with the whole timeline and files"
+msgstr "Удалить и заявку со всей историей и файлами"
+
+#: tracker/models.py:66
+msgid "Manual"
+msgstr "Вручную"
+
+#: tracker/models.py:70
+msgid "Rough"
+msgstr "Черновая"
+
+#: tracker/models.py:71
+msgid "Final"
+msgstr "Итоговая"
+
+#: tracker/models.py:75 tracker/models.py:189
+msgid "Applied"
+msgstr "Отправлена"
+
+#: tracker/models.py:76
+msgid "Dismissed"
+msgstr "Отклонена"
+
+#: tracker/models.py:190
+msgid "Replied"
+msgstr "Есть ответ"
+
+#: tracker/models.py:191 tracker/models.py:263
+msgid "Interview"
+msgstr "Собеседование"
+
+#: tracker/models.py:192
+msgid "Offer"
+msgstr "Оффер"
+
+#: tracker/models.py:193
+msgid "Rejected"
+msgstr "Отказ"
+
+#: tracker/models.py:194
+msgid "No response"
+msgstr "Нет ответа"
+
+#: tracker/models.py:195
+msgid "Withdrawn"
+msgstr "Отозвана"
+
+#: tracker/models.py:260
+msgid "Status change"
+msgstr "Смена статуса"
+
+#: tracker/models.py:261
+msgid "Note"
+msgstr "Заметка"
+
+#: tracker/models.py:262
+msgid "Call"
+msgstr "Звонок"
+
+#: tracker/models.py:264
+msgid "Email"
+msgstr "Письмо"
+
+#: tracker/templates/tracker/application_detail.html:11
+#: tracker/templates/tracker/vacancy_confirm_delete.html:10
+#, python-format
+msgid "applied %(date)s"
+msgstr "отклик %(date)s"
+
+#: tracker/templates/tracker/application_detail.html:12
+#: tracker/templates/tracker/inbox.html:49
+msgid "posting"
+msgstr "объявление"
+
+#: tracker/templates/tracker/application_detail.html:13
+#: tracker/templates/tracker/inbox.html:39
+#, python-format
+msgid "Closed on Profesia (%(date)s)"
+msgstr "Закрыто на Profesia (%(date)s)"
+
+#: tracker/templates/tracker/application_detail.html:17
+msgid "Previous attempt:"
+msgstr "Предыдущая попытка:"
+
+#: tracker/templates/tracker/application_detail.html:20
+msgid "Later attempt:"
+msgstr "Следующая попытка:"
+
+#: tracker/templates/tracker/application_detail.html:26
+msgid "Change status"
+msgstr "Сменить статус"
+
+#: tracker/templates/tracker/application_detail.html:30
+msgid "Update status"
+msgstr "Обновить статус"
+
+#: tracker/templates/tracker/application_detail.html:35
+msgid "Add event"
+msgstr "Добавить событие"
+
+#: tracker/templates/tracker/application_detail.html:39
+msgid "Add to timeline"
+msgstr "Добавить в историю"
+
+#: tracker/templates/tracker/application_detail.html:44
+msgid "Timeline"
+msgstr "История"
+
+#: tracker/templates/tracker/application_detail.html:52
+msgid "Nothing yet."
+msgstr "Пока ничего."
+
+#: tracker/templates/tracker/application_detail.html:56
+msgid "Attachments"
+msgstr "Файлы"
+
+#: tracker/templates/tracker/application_detail.html:61
+msgid "None."
+msgstr "Нет."
+
+#: tracker/templates/tracker/application_detail.html:67
+msgid "Upload"
+msgstr "Загрузить"
+
+#: tracker/templates/tracker/application_list.html:13
+msgid "Title or company"
+msgstr "Должность или компания"
+
+#: tracker/templates/tracker/application_list.html:15
+msgid "Any status"
+msgstr "Любой статус"
+
+#: tracker/templates/tracker/application_list.html:20
+msgid "Search"
+msgstr "Найти"
+
+#: tracker/templates/tracker/application_list.html:24
+msgid "Show archive (rejected, no response, withdrawn)"
+msgstr "Показать архив (отказ, нет ответа, отозвана)"
+
+#: tracker/templates/tracker/application_list.html:30
+#: tracker/templates/tracker/dashboard.html:17
+msgid "Vacancy"
+msgstr "Вакансия"
+
+#: tracker/templates/tracker/application_list.html:41
+msgid "No applications found."
+msgstr "Заявок не найдено."
+
+#: tracker/templates/tracker/apply_form.html:6
+#, python-format
+msgid "I applied: %(title)s"
+msgstr "Отклик: %(title)s"
+
+#: tracker/templates/tracker/apply_form.html:9
+msgid "You already applied to this posting:"
+msgstr "Вы уже откликались на это объявление:"
+
+#: tracker/templates/tracker/apply_form.html:20
+msgid "Save application"
+msgstr "Сохранить заявку"
+
+#: tracker/templates/tracker/apply_form.html:21
+#: tracker/templates/tracker/company_confirm_delete.html:10
+#: tracker/templates/tracker/company_form.html:11
+#: tracker/templates/tracker/vacancy_confirm_delete.html:20
+#: tracker/templates/tracker/vacancy_form.html:11
+msgid "Cancel"
+msgstr "Отмена"
+
+#: tracker/templates/tracker/company_confirm_delete.html:6
+#, python-format
+msgid "Delete %(name)s?"
+msgstr "Удалить %(name)s?"
+
+#: tracker/templates/tracker/company_confirm_delete.html:9
+#: tracker/templates/tracker/vacancy_confirm_delete.html:19
+msgid "Yes, delete"
+msgstr "Да, удалить"
+
+#: tracker/templates/tracker/company_form.html:6
+#, python-format
+msgid "Edit %(name)s"
+msgstr "Изменить: %(name)s"
+
+#: tracker/templates/tracker/company_form.html:6
+msgid "New company"
+msgstr "Новая компания"
+
+#: tracker/templates/tracker/company_form.html:10
+#: tracker/templates/tracker/vacancy_form.html:10
+msgid "Save"
+msgstr "Сохранить"
+
+#: tracker/templates/tracker/company_list.html:8
+msgid "Add company"
+msgstr "Добавить компанию"
+
+#: tracker/templates/tracker/company_list.html:21
+#: tracker/templates/tracker/vacancy_list.html:29
+msgid "Edit"
+msgstr "Изменить"
+
+#: tracker/templates/tracker/company_list.html:22
+#: tracker/templates/tracker/vacancy_list.html:30
+msgid "Delete"
+msgstr "Удалить"
+
+#: tracker/templates/tracker/company_list.html:29
+msgid "No companies yet."
+msgstr "Компаний пока нет."
+
+#: tracker/templates/tracker/dashboard.html:10
+msgid "Needs attention"
+msgstr "Требует внимания"
+
+#: tracker/templates/tracker/dashboard.html:11
+#, python-format
+msgid ""
+"Active applications with no news for %(days)s+ days — time to follow up or "
+"close them."
+msgstr ""
+"Активные заявки без новостей %(days)s+ дн. — пора напомнить о себе или "
+"закрыть их."
+
+#: tracker/templates/tracker/dashboard.html:17
+msgid "Last activity"
+msgstr "Последнее движение"
+
+#: tracker/templates/tracker/dashboard.html:25
+#, python-format
+msgid "%(since)s ago"
+msgstr "%(since)s назад"
+
+#: tracker/templates/tracker/dashboard.html:25
+#, python-format
+msgid "applied %(since)s ago"
+msgstr "отклик %(since)s назад"
+
+#: tracker/templates/tracker/dashboard.html:31
+msgid "Nothing is waiting on you."
+msgstr "Ничего не ждёт вашего ответа."
+
+#: tracker/templates/tracker/dashboard.html:43
+#, python-format
+msgid "Inbox: %(count)s waiting"
+msgstr "Во входящих ждут: %(count)s"
+
+#: tracker/templates/tracker/dashboard.html:47
+msgid "Recent events"
+msgstr "Недавние события"
+
+#: tracker/templates/tracker/dashboard.html:56
+msgid "No events yet."
+msgstr "Событий пока нет."
+
+#: tracker/templates/tracker/inbox.html:8
+#, python-format
+msgid ""
+"Fresh vacancies scored %(score)s+ (and ones you added by hand), best first."
+msgstr ""
+"Свежие вакансии с оценкой %(score)s+ (и добавленные вручную), лучшие сверху."
+
+#: tracker/templates/tracker/inbox.html:11
+msgid "Add one by hand"
+msgstr "Добавить вручную"
+
+#: tracker/templates/tracker/inbox.html:18
+#, python-format
+msgid "Unprocessed (older than %(days)s days, or dismissed)"
+msgstr "Необработанные (старше %(days)s дн. или отклонённые)"
+
+#: tracker/templates/tracker/inbox.html:24
+#, python-format
+msgid "Score below %(score)s"
+msgstr "Оценка ниже %(score)s"
+
+#: tracker/templates/tracker/inbox.html:27
+msgid "Show"
+msgstr "Показать"
+
+#: tracker/templates/tracker/inbox.html:35
+#, python-format
+msgid "score %(score)s"
+msgstr "оценка %(score)s"
+
+#: tracker/templates/tracker/inbox.html:35
+msgid "rough"
+msgstr "черновая"
+
+#: tracker/templates/tracker/inbox.html:37
+msgid "dismissed"
+msgstr "отклонена"
+
+#: tracker/templates/tracker/inbox.html:38
+msgid "newer repost in inbox"
+msgstr "во входящих есть более новая перепубликация"
+
+#: tracker/templates/tracker/inbox.html:41
+#, python-format
+msgid "Already applied on %(date)s — %(status)s"
+msgstr "Уже откликались %(date)s — %(status)s"
+
+#: tracker/templates/tracker/inbox.html:43
+msgid "Dismissed before"
+msgstr "Уже отклоняли"
+
+#: tracker/templates/tracker/inbox.html:55
+msgid "I applied"
+msgstr "Отклик отправлен"
+
+#: tracker/templates/tracker/inbox.html:60
+msgid "Back to inbox"
+msgstr "Вернуть во входящие"
+
+#: tracker/templates/tracker/inbox.html:66
+msgid "Why not? (optional)"
+msgstr "Почему нет? (необязательно)"
+
+#: tracker/templates/tracker/inbox.html:67
+msgid "Dismiss"
+msgstr "Отклонить"
+
+#: tracker/templates/tracker/inbox.html:73
+msgid "Nothing to look at right now."
+msgstr "Сейчас смотреть нечего."
+
+#: tracker/templates/tracker/vacancy_confirm_delete.html:6
+#, python-format
+msgid "Delete %(vacancy)s?"
+msgstr "Удалить %(vacancy)s?"
+
+#: tracker/templates/tracker/vacancy_confirm_delete.html:9
+msgid "This vacancy has an application"
+msgstr "У этой вакансии есть заявка"
+
+#: tracker/templates/tracker/vacancy_confirm_delete.html:11
+#, python-format
+msgid ""
+"Timeline events: %(events)s, files: %(files)s. Deleting the vacancy deletes "
+"all of it. This cannot be undone."
+msgstr ""
+"Событий в истории: %(events)s, файлов: %(files)s. Удаление вакансии удалит "
+"всё это. Отменить будет нельзя."
+
+#: tracker/templates/tracker/vacancy_form.html:6
+#, python-format
+msgid "Edit %(title)s"
+msgstr "Изменить: %(title)s"
+
+#: tracker/templates/tracker/vacancy_form.html:6
+msgid "New vacancy"
+msgstr "Новая вакансия"
+
+#: tracker/templates/tracker/vacancy_list.html:9
+msgid "Show:"
+msgstr "Показать:"
+
+#: tracker/templates/tracker/vacancy_list.html:10
+msgid "all"
+msgstr "все"
+
+#: tracker/templates/tracker/vacancy_list.html:14
+msgid "add vacancy"
+msgstr "добавить вакансию"
+
+#: tracker/templates/tracker/vacancy_list.html:19
+msgid "State"
+msgstr "Состояние"
+
+#: tracker/templates/tracker/vacancy_list.html:19
+msgid "Score"
+msgstr "Оценка"
+
+#: tracker/templates/tracker/vacancy_list.html:34
+msgid "Nothing here."
+msgstr "Здесь пусто."
+
+#: tracker/views.py:95
+#, python-format
+msgid "%(company)s has vacancies — delete or move them first."
+msgstr ""
+"У компании %(company)s есть вакансии — сначала удалите или перенесите их."
+
+#: tracker/views.py:205
+#, python-format
+msgid "Deleted: %(vacancy)s."
+msgstr "Удалено: %(vacancy)s."
+
+#: tracker/views.py:257
+#, python-format
+msgid "Applied: %(vacancy)s."
+msgstr "Отклик сохранён: %(vacancy)s."
+
+#: tracker/views.py:278
+#, python-format
+msgid "Dismissed: %(vacancy)s."
+msgstr "Отклонено: %(vacancy)s."
+
+#: tracker/views.py:296
+#, python-format
+msgid "Back in the inbox: %(vacancy)s."
+msgstr "Снова во входящих: %(vacancy)s."
