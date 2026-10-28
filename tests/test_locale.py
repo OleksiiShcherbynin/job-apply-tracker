@@ -45,6 +45,13 @@ def test_set_language_sets_cookie_and_returns(logged_in):
     assert response.cookies[settings.LANGUAGE_COOKIE_NAME].value == "sk"
 
 
+def test_language_choice_survives_closing_the_browser(logged_in):
+    response = logged_in.post(reverse("set_language"), {"language": "ru", "next": "/"})
+
+    # A cookie without max-age dies with the browser session.
+    assert response.cookies[settings.LANGUAGE_COOKIE_NAME]["max-age"] >= 60 * 60 * 24 * 365
+
+
 def test_set_language_never_redirects_off_site(logged_in):
     response = logged_in.post(
         reverse("set_language"), {"language": "sk", "next": "https://evil.example/"}
