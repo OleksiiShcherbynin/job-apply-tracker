@@ -117,6 +117,15 @@ def test_timeline_shows_the_closure_in_the_users_language(client, user):
     assert "Posting closed on Profesia" not in html
 
 
+def test_timeline_puts_the_colon_right_after_the_event_type(client, user):
+    application = ApplicationFactory(vacancy__company=CompanyFactory(owner=user))
+    EventFactory(application=application, type=ApplicationEvent.EventType.CALL, text="HR")
+
+    html = client.get(application.get_absolute_url()).text
+
+    assert "Call: HR" in html
+
+
 def test_dashboard_recent_events_use_the_users_language(client, user):
     application = ApplicationFactory(vacancy__company=CompanyFactory(owner=user))
     EventFactory(application=application, text=CLOSED_EVENT_TEXT, happened_at=timezone.now())

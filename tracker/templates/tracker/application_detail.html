@@ -45,8 +45,7 @@
   <ul>
     {% for event in application.events.all %}
       <li>
-        <strong>{{ event.happened_at|date:"Y-m-d H:i" }}</strong> — {{ event.get_type_display }}
-        {% if event.text %}: {{ event.text|system_text }}{% endif %}
+        <strong>{{ event.happened_at|date:"Y-m-d H:i" }}</strong> — {{ event.get_type_display }}{% if event.text %}: {{ event.text|system_text }}{% endif %}
       </li>
     {% empty %}
       <li>{% translate "Nothing yet." %}</li>
